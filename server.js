@@ -66,6 +66,8 @@ const EVENTS = [
   { id: 'dividend', name: '동맹 배당',  desc: '유지 중인 동맹 1개당 +20 지급', dividend: 20 },
   { id: 'purge',    name: '대숙청',     desc: '배신 탈취 2배 · 배신자 낙인 없음', betray: 2, noMark: true },
   { id: 'emp',      name: 'EMP 폭풍',   desc: '모든 수익 절반', global: 0.5 },
+  { id: 'blackout', name: '블랙아웃',   desc: '방화벽 마비 — 반격 불가 · 수비 수익 0', blackout: true },
+  { id: 'jackpot',  name: '잭팟',       desc: '무작위 1명에게 +100C 입금 — 모두가 노린다', jackpot: 100 },
 ];
 const EVENT_STANDARD = { id: 'standard', name: '표준 프로토콜', desc: '기본 규칙으로 진행' };
 const EVENT_FINAL = { id: 'final', name: '파이널 퍼지', desc: '마지막 라운드! 해킹 1.5배 · 현상금 2배', hack: 1.5, bountyMul: 2 };
@@ -128,6 +130,11 @@ class Room {
     this.phaseDuration = 0;
     this.settings = { ...DEFAULT_SETTINGS };
     this.lastWinners = [];
+    this.linkAges = new Map();   // linkKey -> 유지된 라운드 수 (신뢰 스택)
+    this.bountyPot = 0;          // 누적 현상금 팟
+    this.bountyClaimed = false;
+    this.jackpotTo = null;
+    this.warns = new Map();      // targetId -> 이번 라운드 받은 경고 수
   }
 
   setHost(name, ws) {
@@ -237,6 +244,7 @@ class Room {
         event: this.event, ends: this.phaseEnds, duration: this.phaseDuration,
         players: this.snapshot(), bounty: this.bountyTarget,
         winnersN: this.winnersCount(), settings: this.publicSettings(),
+        bountyPot: this.bountyPot, jackpotTo: this.jackpotTo, linkAges: Object.fromEntries(this.linkAges),
       });
     }
     if (this.state === 'over') this.send(to, { t: 'over', winners: this.lastWinners, players: this.snapshot() });
@@ -248,6 +256,10 @@ class Room {
     this.state = 'playing';
     this.round = 0;
     this.links.clear();
+    this.linkAges.clear();
+    this.bountyPot = this.settings.bountyBase;
+    this.bountyClaimed = false;
+    this.jackpotTo = null;
     this.eventPool = [...EVENTS].sort(() => Math.random() - 0.5);
     for (const p of this.players.values()) {
       p.credits = START_CREDITS; p.action = null; p.target = null; p.traitorUntil = 0;
@@ -260,6 +272,22 @@ class Room {
     if (this.round === 1) this.event = EVENT_STANDARD;
     else if (this.round === this.settings.rounds) this.event = EVENT_FINAL;
     else this.event = this.eventPool[(this.round - 2) % this.eventPool.length];
+    // 동맹 신뢰 누적: 한 라운드 버틴 동맹은 신뢰가 쌓인다
+    if (this.round > 1) for (const k of this.links) this.linkAges.set(k, (this.linkAges.get(k) || 0) + 1);
+    // 현상금 팟: 잡히면 리셋, 선두가 버티면 매 라운드 +10 누적
+    if (this.round > 1) {
+      if (this.bountyClaimed) this.bountyPot = this.settings.bountyBase;
+      else this.bountyPot += 10;
+      this.bountyClaimed = false;
+    }
+    // 잭팟 이벤트: 무작위 1명에게 즉시 입금 (왕관이 옮겨갈 수 있음)
+    this.jackpotTo = null;
+    if (this.event.jackpot) {
+      const ps = [...this.players.values()];
+      const lucky = ps[Math.floor(Math.random() * ps.length)];
+      lucky.credits += this.event.jackpot;
+      this.jackpotTo = lucky.id;
+    }
     // 선두 = 현상금 타깃
     let leader = null;
     for (const p of this.players.values()) if (!leader || p.credits > leader.credits) leader = p;
@@ -279,8 +307,9 @@ class Room {
       event: this.event, ends: this.phaseEnds, duration: dur,
       players: this.snapshot(), bounty: this.bountyTarget,
       winnersN: this.winnersCount(), settings: this.publicSettings(),
+      bountyPot: this.bountyPot, jackpotTo: this.jackpotTo, linkAges: Object.fromEntries(this.linkAges),
     });
-    if (phase === 'signal') this.botsSignal();
+    if (phase === 'signal') { this.warns.clear(); this.botsSignal(); }
     if (phase === 'action') { for (const p of this.players.values()) { p.action = null; p.target = null; } this.botsAct(); }
     this.timer = setTimeout(() => this.advance(), dur);
   }
@@ -322,8 +351,9 @@ class Room {
       if (target.bot) this.botRespond(target, p);
     } else if (msg.kind === 'break') {
       const k = linkKey(p.id, target.id);
-      if (this.links.delete(k)) this.broadcast({ t: 'linkBroken', a: p.id, b: target.id, betrayal: false });
+      if (this.links.delete(k)) { this.linkAges.delete(k); this.broadcast({ t: 'linkBroken', a: p.id, b: target.id, betrayal: false }); }
     } else if (msg.kind === 'warn') {
+      this.warns.set(target.id, (this.warns.get(target.id) || 0) + 1);
       this.broadcast({ t: 'sig', kind: 'warn', from: p.id, to: target.id });
     }
   }
@@ -336,6 +366,7 @@ class Room {
     const maxLinks = this.settings.maxLinks;
     if (this.linkedIds(p.id).length >= maxLinks || this.linkedIds(from.id).length >= maxLinks) return;
     this.links.add(linkKey(p.id, from.id));
+    this.linkAges.set(linkKey(p.id, from.id), 0);
     this.broadcast({ t: 'linkFormed', a: from.id, b: p.id });
   }
 
@@ -368,15 +399,17 @@ class Room {
       const t = this.players.get(h.target);
       if (!t) continue;
       const allied = this.links.has(linkKey(h.id, t.id));
-      if (t.action === 'wall') {
+      if (t.action === 'wall' && !ev.blackout) {
         const amt = Math.min(h.credits, mul(s.counter * (ev.counter || 1)));
         h.credits -= amt; t.credits += amt;
         logs.push({ type: 'blocked', from: h.id, to: t.id, amount: amt });
       } else {
         let base = t.action === 'mine' ? s.steal : s.hackVsHack;
         let betrayal = false;
+        let trust = 0;
         if (allied) {
-          base = s.betraySteal * (ev.betray || 1);
+          trust = Math.min(this.linkAges.get(linkKey(h.id, t.id)) || 0, 4);
+          base = (s.betraySteal + trust * 10) * (ev.betray || 1); // 오래된 동맹일수록 배신 수익↑
           betrayal = true;
         }
         base *= (ev.hack || 1);
@@ -385,32 +418,40 @@ class Room {
         t.credits -= amt; h.credits += amt;
         let bounty = 0;
         if (t.id === this.bountyTarget) {
-          bounty = mul((s.bountyBase + (ev.bountyBonus || 0)) * (ev.bountyMul || 1));
+          const pot = this.bountyClaimed ? s.bountyBase : this.bountyPot;
+          bounty = mul((pot + (ev.bountyBonus || 0)) * (ev.bountyMul || 1));
           h.credits += bounty;
+          this.bountyClaimed = true;
         }
         if (betrayal) {
-          this.links.delete(linkKey(h.id, t.id));
+          const bk = linkKey(h.id, t.id);
+          this.links.delete(bk);
+          this.linkAges.delete(bk);
           if (!ev.noMark) h.traitorUntil = this.round + 1;
           this.broadcast({ t: 'linkBroken', a: h.id, b: t.id, betrayal: true });
         }
-        logs.push({ type: 'hack', from: h.id, to: t.id, amount: amt, bounty, betrayal });
+        logs.push({ type: 'hack', from: h.id, to: t.id, amount: amt, bounty, betrayal, trust });
       }
     }
 
-    // 2) 채굴 정산 (동맹 합동 보너스)
+    // 2) 채굴 정산 (동맹 합동 보너스 — 오래 유지한 동맹일수록 +5/라운드, 최대 +20)
     for (const p of players.filter(x => x.action === 'mine')) {
-      const allies = this.linkedIds(p.id).filter(id => {
+      let bonus = 0, allies = 0;
+      for (const id of this.linkedIds(p.id)) {
         const a = this.players.get(id);
-        return a && a.action === 'mine';
-      });
-      const amt = mul(Math.round((s.mineBase + allies.length * s.allyMineBonus) * (ev.mine || 1)));
+        if (a && a.action === 'mine') {
+          allies++;
+          bonus += s.allyMineBonus + Math.min((this.linkAges.get(linkKey(p.id, id)) || 0) * 5, 20);
+        }
+      }
+      const amt = mul(Math.round((s.mineBase + bonus) * (ev.mine || 1)));
       p.credits += amt;
-      logs.push({ type: 'mine', from: p.id, amount: amt, allies: allies.length });
+      logs.push({ type: 'mine', from: p.id, amount: amt, allies });
     }
 
-    // 3) 방화벽 기본 수익
+    // 3) 방화벽 기본 수익 (블랙아웃이면 0)
     for (const p of players.filter(x => x.action === 'wall')) {
-      const amt = mul(s.wallBase + (ev.wallBase || 0));
+      const amt = ev.blackout ? 0 : mul(s.wallBase + (ev.wallBase || 0));
       p.credits += amt;
       logs.push({ type: 'wall', from: p.id, amount: amt });
     }
@@ -433,6 +474,7 @@ class Room {
       t: 'resolve', logs, players: this.snapshot(), round: this.round, rounds: this.settings.rounds,
       ends: this.phaseEnds, duration: dur, bounty: this.bountyTarget,
       winnersN: this.winnersCount(), settings: this.publicSettings(),
+      bountyPot: this.bountyPot, linkAges: Object.fromEntries(this.linkAges),
     });
     this.timer = setTimeout(() => this.advance(), dur);
   }
@@ -472,7 +514,19 @@ class Room {
           const ok = ['🤝', '😈', '🛡️', '💰', '❓', '🔥'];
           this.broadcast({ t: 'sig', kind: 'emoji', from: b.id, emoji: ok[Math.floor(Math.random() * ok.length)] });
         }
-      }, 1500 + Math.random() * 8000);
+        // 경고 신호: 현상금 타깃·배신자·상위권을 공개 지목해 판을 흔든다
+        if (Math.random() < 0.18) {
+          const ranked2 = [...this.players.values()].sort((x, y) => y.credits - x.credits);
+          let wt = null;
+          if (this.bountyTarget && this.bountyTarget !== b.id && Math.random() < 0.6) wt = this.players.get(this.bountyTarget);
+          else wt = ranked2.find(p => p.id !== b.id && p.traitorUntil >= this.round)
+            || ranked2[Math.floor(Math.random() * Math.max(1, Math.ceil(ranked2.length / 2)))];
+          if (wt && wt.id !== b.id) {
+            this.warns.set(wt.id, (this.warns.get(wt.id) || 0) + 1);
+            this.broadcast({ t: 'sig', kind: 'warn', from: b.id, to: wt.id });
+          }
+        }
+      }, 1200 + Math.random() * Math.max(2000, this.phaseMs('signal') - 5000));
     }
   }
 
@@ -504,8 +558,10 @@ class Room {
         if (ev.mine) wMine += 0.25;
         if (ev.hack || ev.betray) wHack += 0.25;
         if (ev.counter || ev.wallBase) wWall += 0.2;
+        if (ev.blackout) { wWall = Math.max(0.05, wWall - 0.15); wHack += 0.2; } // 방화벽 마비 → 공세
         wHack += b.persona.greed * 0.2;
         wWall += b.persona.caution * 0.15;
+        wWall += (this.warns.get(b.id) || 0) * 0.25; // 경고를 받으면 움츠린다
         if (this.linkedIds(b.id).length > 0) wMine += 0.15;
         // 막판: 커트라인 바로 아래면 공격적으로
         let forcedTarget = null;
@@ -519,24 +575,28 @@ class Room {
           let target = forcedTarget;
           if (!target) {
             const traitors = ranked.filter(p => p.id !== b.id && p.traitorUntil >= this.round);
-            if (this.bountyTarget && this.bountyTarget !== b.id && Math.random() < 0.5) target = this.players.get(this.bountyTarget);
+            if (this.jackpotTo && this.jackpotTo !== b.id && Math.random() < 0.45) target = this.players.get(this.jackpotTo);
+            else if (this.bountyTarget && this.bountyTarget !== b.id && Math.random() < 0.5) target = this.players.get(this.bountyTarget);
             else if (traitors.length && Math.random() < 0.5) target = traitors[0];
             else {
               const rich = ranked.slice(0, Math.ceil(ranked.length / 2)).filter(p => p.id !== b.id);
               target = rich[Math.floor(Math.random() * rich.length)];
             }
           }
-          // 배신 판단: 충성도 낮고 막판이면 동맹도 턴다
+          // 배신 판단: 충성도 낮고 막판·대숙청·신뢰가 무르익은 동맹이면 턴다
           const allies = this.linkedIds(b.id);
-          if (allies.length && (lastRounds || ev.betray) && b.persona.loyal < 0.35 && Math.random() < 0.5) {
-            const allyTargets = allies.map(id => this.players.get(id)).filter(Boolean).sort((x, y) => y.credits - x.credits);
+          const ripe = allies.some(id => (this.linkAges.get(linkKey(b.id, id)) || 0) >= 3);
+          if (allies.length && (lastRounds || ev.betray || ripe) && b.persona.loyal < 0.35 && Math.random() < 0.5) {
+            const allyTargets = allies.map(id => this.players.get(id)).filter(Boolean)
+              .sort((x, y) => (y.credits + (this.linkAges.get(linkKey(b.id, y.id)) || 0) * 30)
+                            - (x.credits + (this.linkAges.get(linkKey(b.id, x.id)) || 0) * 30));
             if (allyTargets[0] && allyTargets[0].credits > b.credits * 0.6) target = allyTargets[0];
           }
           if (target && target.id !== b.id) { b.action = 'hack'; b.target = target.id; return; }
         }
         if (r < wHack + wWall) { b.action = 'wall'; b.target = null; }
         else { b.action = 'mine'; b.target = null; }
-      }, 1000 + Math.random() * 10000);
+      }, 800 + Math.random() * Math.max(2000, this.phaseMs('action') - 4000));
     }
   }
 
@@ -573,13 +633,14 @@ class Room {
     if (!p) return;
     if (this.state === 'lobby') {
       this.players.delete(id);
-      for (const k of [...this.links]) if (k.includes(id)) this.links.delete(k);
+      for (const k of [...this.links]) if (k.includes(id)) { this.links.delete(k); this.linkAges.delete(k); }
       this.broadcastRoom();
       if (this.players.size === 0 && (!this.host || !this.host.connected)) rooms.delete(this.code);
     } else {
-      p.connected = false; p.ws = null; // 게임 중엔 자리 유지 (미입력 = 방화벽)
+      p.connected = false; p.ws = null; // 게임 중엔 자리 유지 (미입력 = 방화벽, 재접속 가능)
       this.broadcastRoom();
-      if ([...this.players.values()].every(x => x.bot || !x.connected)) {
+      // 방장이 살아 있으면 방 유지 — 학생 전원이 잠깐 끊겨도(새로고침 등) 게임은 계속된다
+      if ([...this.players.values()].every(x => x.bot || !x.connected) && (!this.host || !this.host.connected)) {
         clearTimeout(this.timer);
         rooms.delete(this.code);
       }

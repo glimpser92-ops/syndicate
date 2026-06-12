@@ -14,7 +14,10 @@ ws.on('message', (raw) => {
   if (m.t === 'room') console.log('로비 인원:', m.players.length);
   if (m.t === 'phase') {
     phases++;
-    if (m.phase === 'event') console.log(`-- R${m.round} 이벤트: ${m.event.name} (${m.event.desc}) | 현상금: ${m.players.find(p => p.id === m.bounty)?.name}`);
+    if (m.phase === 'event') {
+      console.log(`-- R${m.round} 이벤트: ${m.event.name} (${m.event.desc}) | 현상금: ${m.players.find(p => p.id === m.bounty)?.name} (팟 ${m.bountyPot}C)`);
+      if (m.jackpotTo) console.log(`   💰 잭팟 당첨: ${m.players.find(p => p.id === m.jackpotTo)?.name}`);
+    }
     if (m.phase === 'signal') ws.send(JSON.stringify({ t: 'signal', kind: 'emoji', emoji: '🤝' }));
     if (m.phase === 'action') ws.send(JSON.stringify({ t: 'action', act: 'mine' }));
   }
