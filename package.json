@@ -1,0 +1,15 @@
+{
+  "name": "neon-syndicate",
+  "version": "1.0.0",
+  "description": "20인 협력·배신 라운드제 웹 게임 — 네온 사이버펑크",
+  "main": "server.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}
