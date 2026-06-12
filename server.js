@@ -23,6 +23,11 @@ const BETRAY_STEAL = 60;      // 동맹 배신 탈취량
 const HACK_VS_HACK = 20;      // 해킹 중인 대상 해킹 탈취량
 const BOUNTY_BASE = 20;       // 선두 해킹 현상금
 const TRAITOR_MULT = 1.5;     // 배신자 낙인 대상 해킹 배율
+const AMBUSH_BASE = 25;       // 막판 매복 성공 기본 탈취량
+const AMBUSH_CATCHUP = 15;    // 생존선 아래일 때 추가 탈취량
+const AMBUSH_CAP = 45;        // 매복 한 번의 최대 탈취량
+const AMBUSH_FAIL = 15;       // 예측 실패 페널티
+const AMBUSH_PREDICTS = new Set(['mine', 'wall', 'hack', 'ambush']);
 
 const PHASE_MS = { event: 6000, signal: 22000, action: 18000, resolve: 12000 };
 const DEFAULT_SETTINGS = {
@@ -156,7 +161,7 @@ class Room {
   addPlayer(name, ws) {
     const p = {
       id: uid(), token: token(), name: cleanName(name), ws, bot: false,
-      credits: START_CREDITS, action: null, target: null,
+      credits: START_CREDITS, action: null, target: null, predict: null,
       traitorUntil: 0, connected: true,
     };
     this.players.set(p.id, p);
@@ -181,7 +186,7 @@ class Room {
     const name = BOT_NAMES.find(n => !used.has(n)) || ('봇' + this.players.size);
     const p = {
       id: uid(), name, ws: null, bot: true,
-      credits: START_CREDITS, action: null, target: null,
+      credits: START_CREDITS, action: null, target: null, predict: null,
       traitorUntil: 0, connected: true,
       persona: { greed: Math.random(), loyal: Math.random(), caution: Math.random() },
     };
@@ -262,7 +267,7 @@ class Room {
     this.jackpotTo = null;
     this.eventPool = [...EVENTS].sort(() => Math.random() - 0.5);
     for (const p of this.players.values()) {
-      p.credits = START_CREDITS; p.action = null; p.target = null; p.traitorUntil = 0;
+      p.credits = START_CREDITS; p.action = null; p.target = null; p.predict = null; p.traitorUntil = 0;
     }
     this.nextRound();
   }
@@ -310,7 +315,7 @@ class Room {
       bountyPot: this.bountyPot, jackpotTo: this.jackpotTo, linkAges: Object.fromEntries(this.linkAges),
     });
     if (phase === 'signal') { this.warns.clear(); this.botsSignal(); }
-    if (phase === 'action') { for (const p of this.players.values()) { p.action = null; p.target = null; } this.botsAct(); }
+    if (phase === 'action') { for (const p of this.players.values()) { p.action = null; p.target = null; p.predict = null; } this.botsAct(); }
     this.timer = setTimeout(() => this.advance(), dur);
   }
 
@@ -329,6 +334,10 @@ class Room {
 
   winnersCount() {
     return Math.max(1, Math.round(this.players.size * (this.settings.winnersPercent / 100)));
+  }
+
+  isClimaxRound() {
+    return this.round >= this.settings.rounds - 1;
   }
 
   /* ----- 신호 처리 ----- */
@@ -372,14 +381,24 @@ class Room {
 
   handleAction(p, msg) {
     if (this.phase !== 'action') return;
-    if (!['mine', 'hack', 'wall'].includes(msg.act)) return;
+    if (!['mine', 'hack', 'wall', 'ambush'].includes(msg.act)) return;
+    let target = null;
+    let predict = null;
     if (msg.act === 'hack') {
       const t = this.players.get(msg.target);
       if (!t || t.id === p.id) return;
-      p.target = t.id;
-    } else p.target = null;
+      target = t.id;
+    } else if (msg.act === 'ambush') {
+      if (!this.isClimaxRound()) return;
+      const t = this.players.get(msg.target);
+      predict = String(msg.predict || '');
+      if (!t || t.id === p.id || !AMBUSH_PREDICTS.has(predict)) return;
+      target = t.id;
+    }
     p.action = msg.act;
-    this.send(p, { t: 'actionOk', act: msg.act, target: p.target });
+    p.target = target;
+    p.predict = predict;
+    this.send(p, { t: 'actionOk', act: msg.act, target: p.target, predict: p.predict });
   }
 
   /* ----- 라운드 정산 ----- */
@@ -391,10 +410,39 @@ class Room {
     const players = [...this.players.values()];
 
     for (const p of players) {
-      if (!p.action) { p.action = 'wall'; p.target = null; } // 미입력은 방화벽
+      if (!p.action) { p.action = 'wall'; p.target = null; p.predict = null; } // 미입력은 방화벽
     }
 
-    // 1) 해킹 정산
+    const rankedBefore = [...players].sort((a, b) => b.credits - a.credits);
+    const cutoff = this.winnersCount();
+
+    // 1) 막판 매복 판정: 행동 예측을 먼저 공개하고 성공/실패 비용을 확정한다.
+    for (const a of players.filter(x => x.action === 'ambush')) {
+      const t = this.players.get(a.target);
+      const actual = t ? t.action : null;
+      const success = !!t && a.predict === actual;
+      if (success) {
+        const rank = rankedBefore.findIndex(p => p.id === a.id);
+        const belowCutoff = rank >= cutoff;
+        const raw = AMBUSH_BASE + (belowCutoff ? AMBUSH_CATCHUP : 0);
+        const amount = Math.min(t.credits, mul(Math.min(AMBUSH_CAP, raw)));
+        t.credits -= amount;
+        a.credits += amount;
+        logs.push({
+          type: 'ambush', from: a.id, to: t.id, predict: a.predict, actual,
+          success: true, amount, belowCutoff, catchup: belowCutoff ? AMBUSH_CATCHUP : 0,
+        });
+      } else {
+        const penalty = Math.min(a.credits, AMBUSH_FAIL);
+        a.credits -= penalty;
+        logs.push({
+          type: 'ambush', from: a.id, to: t ? t.id : null, predict: a.predict, actual,
+          success: false, amount: penalty, penalty,
+        });
+      }
+    }
+
+    // 2) 해킹 정산
     for (const h of players.filter(x => x.action === 'hack')) {
       const t = this.players.get(h.target);
       if (!t) continue;
@@ -434,7 +482,7 @@ class Room {
       }
     }
 
-    // 2) 채굴 정산 (동맹 합동 보너스 — 오래 유지한 동맹일수록 +5/라운드, 최대 +20)
+    // 3) 채굴 정산 (동맹 합동 보너스 — 오래 유지한 동맹일수록 +5/라운드, 최대 +20)
     for (const p of players.filter(x => x.action === 'mine')) {
       let bonus = 0, allies = 0;
       for (const id of this.linkedIds(p.id)) {
@@ -449,14 +497,14 @@ class Room {
       logs.push({ type: 'mine', from: p.id, amount: amt, allies });
     }
 
-    // 3) 방화벽 기본 수익 (블랙아웃이면 0)
+    // 4) 방화벽 기본 수익 (블랙아웃이면 0)
     for (const p of players.filter(x => x.action === 'wall')) {
       const amt = ev.blackout ? 0 : mul(s.wallBase + (ev.wallBase || 0));
       p.credits += amt;
       logs.push({ type: 'wall', from: p.id, amount: amt });
     }
 
-    // 4) 동맹 배당 이벤트
+    // 5) 동맹 배당 이벤트
     if (ev.dividend) {
       for (const p of players) {
         const n = this.linkedIds(p.id).length;
@@ -554,7 +602,7 @@ class Room {
         const ev = this.event;
         const myRank = ranked.findIndex(p => p.id === b.id);
         const lastRounds = this.round >= this.settings.rounds - 1;
-        let wMine = 0.55, wHack = 0.25, wWall = 0.20;
+        let wMine = 0.55, wHack = 0.25, wWall = 0.20, wAmbush = 0;
         if (ev.mine) wMine += 0.25;
         if (ev.hack || ev.betray) wHack += 0.25;
         if (ev.counter || ev.wallBase) wWall += 0.2;
@@ -566,12 +614,13 @@ class Room {
         // 막판: 커트라인 바로 아래면 공격적으로
         let forcedTarget = null;
         if (lastRounds && myRank >= cutoff && myRank < cutoff + 4) {
-          wHack += 0.5;
+          wHack += 0.3;
+          wAmbush += 0.45;
           forcedTarget = ranked[cutoff - 1] && ranked[cutoff - 1].id !== b.id ? ranked[cutoff - 1] : null;
+        } else if (lastRounds && myRank >= cutoff) {
+          wAmbush += 0.25;
         }
-        const total = wMine + wHack + wWall;
-        const r = Math.random() * total;
-        if (r < wHack) {
+        const pickPressureTarget = () => {
           let target = forcedTarget;
           if (!target) {
             const traitors = ranked.filter(p => p.id !== b.id && p.traitorUntil >= this.round);
@@ -580,9 +629,33 @@ class Room {
             else if (traitors.length && Math.random() < 0.5) target = traitors[0];
             else {
               const rich = ranked.slice(0, Math.ceil(ranked.length / 2)).filter(p => p.id !== b.id);
-              target = rich[Math.floor(Math.random() * rich.length)];
+              target = rich[Math.floor(Math.random() * rich.length)] || ranked.find(p => p.id !== b.id);
             }
           }
+          return target && target.id !== b.id ? target : null;
+        };
+        const predictForAmbush = (target) => {
+          const targetRank = ranked.findIndex(p => p.id === target.id);
+          if ((this.warns.get(target.id) || 0) > 1) return 'wall';
+          if (lastRounds && targetRank >= cutoff && Math.random() < 0.38) return 'ambush';
+          if (target.traitorUntil >= this.round && Math.random() < 0.35) return 'wall';
+          if (this.linkedIds(target.id).length && Math.random() < 0.45) return 'mine';
+          if (target.id === this.bountyTarget && Math.random() < 0.35) return 'wall';
+          return Math.random() < 0.58 ? 'mine' : 'hack';
+        };
+        const total = wMine + wHack + wWall + wAmbush;
+        const r = Math.random() * total;
+        if (r < wAmbush) {
+          const target = pickPressureTarget();
+          if (target) {
+            b.action = 'ambush';
+            b.target = target.id;
+            b.predict = predictForAmbush(target);
+            return;
+          }
+        }
+        if (r < wAmbush + wHack) {
+          let target = pickPressureTarget();
           // 배신 판단: 충성도 낮고 막판·대숙청·신뢰가 무르익은 동맹이면 턴다
           const allies = this.linkedIds(b.id);
           const ripe = allies.some(id => (this.linkAges.get(linkKey(b.id, id)) || 0) >= 3);
@@ -592,10 +665,10 @@ class Room {
                             - (x.credits + (this.linkAges.get(linkKey(b.id, x.id)) || 0) * 30));
             if (allyTargets[0] && allyTargets[0].credits > b.credits * 0.6) target = allyTargets[0];
           }
-          if (target && target.id !== b.id) { b.action = 'hack'; b.target = target.id; return; }
+          if (target && target.id !== b.id) { b.action = 'hack'; b.target = target.id; b.predict = null; return; }
         }
-        if (r < wHack + wWall) { b.action = 'wall'; b.target = null; }
-        else { b.action = 'mine'; b.target = null; }
+        if (r < wAmbush + wHack + wWall) { b.action = 'wall'; b.target = null; b.predict = null; }
+        else { b.action = 'mine'; b.target = null; b.predict = null; }
       }, 800 + Math.random() * Math.max(2000, this.phaseMs('action') - 4000));
     }
   }

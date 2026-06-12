@@ -177,9 +177,10 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:98;
 .monitor-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
 .monitor-head b{font-size:12px;color:#fff;letter-spacing:.18em}
 .monitor-head span{font-size:11px;color:var(--dim)}
-.monitor-code{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;margin-bottom:10px}
+.monitor-code{display:grid;grid-template-columns:1fr;gap:8px;align-items:center;justify-items:center;margin-bottom:10px;text-align:center}
+.monitor-code>div{width:100%}
 .monitor-code strong{display:block;font:900 34px 'Share Tech Mono',monospace;color:var(--cyan);letter-spacing:.22em;text-shadow:0 0 18px rgba(0,229,255,.6)}
-.qr-img{width:88px;height:88px;border-radius:8px;border:1px solid rgba(0,229,255,.28);background:#fff;padding:4px}
+.qr-img{display:block;width:176px;height:176px;border-radius:8px;border:1px solid rgba(0,229,255,.28);background:#fff;padding:4px;image-rendering:pixelated}
 .monitor-link{display:flex;gap:7px;margin-bottom:10px}
 .monitor-link input{flex:1;min-width:0;padding:8px;border:1px solid rgba(0,229,255,.24);border-radius:7px;background:rgba(0,10,25,.72);color:var(--text);font-size:11px}
 .monitor-stats{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:10px}
@@ -218,6 +219,12 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:98;
 .act-wall:hover,.act-wall.sel{background:rgba(0,229,255,.22);box-shadow:0 0 20px rgba(0,229,255,.35)}
 .act-hack{border-color:var(--red);color:var(--red);background:rgba(255,59,92,.07)}
 .act-hack:hover,.act-hack.sel{background:rgba(255,59,92,.22);box-shadow:0 0 20px rgba(255,59,92,.35)}
+.act-ambush{border-color:var(--gold);color:var(--gold);background:rgba(255,209,102,.08)}
+.act-ambush:hover,.act-ambush.sel{background:rgba(255,209,102,.22);box-shadow:0 0 20px rgba(255,209,102,.36)}
+.predict-row{padding:5px 8px;border:1px solid rgba(255,209,102,.24);border-radius:10px;background:rgba(9,13,30,.78);backdrop-filter:blur(6px)}
+.predict-btn{padding:8px 11px;border-radius:8px;border:1px solid rgba(255,209,102,.44);color:var(--gold);
+  background:rgba(255,209,102,.07);font-size:12.5px;font-weight:800;transition:.15s}
+.predict-btn:hover,.predict-btn.sel{background:rgba(255,209,102,.2);box-shadow:0 0 16px rgba(255,209,102,.25)}
 .sig-btn{padding:9px 14px;border-radius:9px;font-size:13px;border:1px solid;transition:.15s}
 .sig-link{border-color:var(--green);color:var(--green)}
 .sig-link:hover,.sig-link.sel{background:rgba(61,255,180,.18)}
@@ -461,6 +468,13 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:98;
       <button class="act-btn act-mine" data-act="mine">⛏ 채굴<small>+30 · 동맹 합동 +15/명</small></button>
       <button class="act-btn act-wall" data-act="wall">🛡 방화벽<small>+10 · 해커 반격 +30</small></button>
       <button class="act-btn act-hack" data-act="hack">⚡ 해킹<small>대상 선택 → 40 탈취</small></button>
+      <button class="act-btn act-ambush" data-act="ambush" style="display:none">🎯 매복<small>마지막 2R · 예측 탈취</small></button>
+    </div>
+    <div class="dock-row predict-row" id="ambush-predict" style="display:none">
+      <button class="predict-btn" data-predict="mine">⛏ 채굴</button>
+      <button class="predict-btn" data-predict="wall">🛡 방화벽</button>
+      <button class="predict-btn" data-predict="hack">⚡ 해킹</button>
+      <button class="predict-btn" data-predict="ambush">🎯 매복</button>
     </div>
     <div class="dock-row" id="dock-signals" style="display:none">
       <button class="sig-btn sig-link" data-sig="propose">🤝 동맹 제안</button>
@@ -490,7 +504,7 @@ let players=new Map(), order=[], links=new Set();
 let phase='lobby', phaseEnds=0, phaseDur=1, round=1, rounds=7;
 let curEvent={name:'표준 프로토콜'}, bounty=null, winnersN=4;
 let linkAges={}, bountyPot=0, jackpotTo=null;
-let selected=null, selMode=null, myAction=null, myTarget=null;
+let selected=null, selMode=null, myAction=null, myTarget=null, myPredict=null, pendingAmbushTarget=null;
 let roomSettings={}, maxPlayers=20, minPlayers=4;
 const $=id=>document.getElementById(id);
 const linkKey=(a,b)=>[a,b].sort().join('|');
@@ -532,7 +546,7 @@ function updateInviteViews(code=roomCode){
   if($('game-link'))$('game-link').value=link;
   if($('game-code'))$('game-code').textContent=code;
   if($('monitor-code'))$('monitor-code').textContent=code;
-  if($('qr-img'))$('qr-img').src='https://api.qrserver.com/v1/create-qr-code/?size=176x176&margin=8&data='+encodeURIComponent(link);
+  if($('qr-img'))$('qr-img').src='https://api.qrserver.com/v1/create-qr-code/?size=352x352&margin=8&data='+encodeURIComponent(link);
 }
 
 function applySettings(settings={}){
@@ -769,6 +783,19 @@ function updateMonitor(){
 
 /* ================= 페이즈 ================= */
 const PHASE_KO={event:'이벤트',signal:'신호 교환',action:'행동 결정',resolve:'정산'};
+const ACTION_KO={mine:'채굴',wall:'방화벽',hack:'해킹',ambush:'매복'};
+const ACTION_ICON={mine:'⛏',wall:'🛡',hack:'⚡',ambush:'🎯'};
+const actionText=act=>`${ACTION_ICON[act]||''} ${ACTION_KO[act]||act||'?'}`.trim();
+const isClimaxRound=()=>round>=rounds-1;
+function hideAmbushPredict(){
+  pendingAmbushTarget=null;
+  $('ambush-predict').style.display='none';
+  document.querySelectorAll('#ambush-predict .predict-btn').forEach(x=>x.classList.remove('sel'));
+}
+function showAmbushPredict(){
+  $('ambush-predict').style.display='flex';
+  document.querySelectorAll('#ambush-predict .predict-btn').forEach(x=>x.classList.remove('sel'));
+}
 function onPhase(m){
   show('screen-game');
   phase=m.phase;phaseEnds=m.ends;phaseDur=m.duration;round=m.round;rounds=m.rounds;
@@ -790,10 +817,13 @@ function onPhase(m){
   $('rejoin-card').style.display=isHost()?'none':'flex';
   $('dock').style.display=isHost()?'none':'flex';
   $('dock-actions').style.display=!isHost()&&phase==='action'?'flex':'none';
+  const ambushBtn=document.querySelector('#dock-actions [data-act="ambush"]');
+  if(ambushBtn)ambushBtn.style.display=isClimaxRound()?'block':'none';
   $('dock-signals').style.display=!isHost()&&phase==='signal'?'flex':'none';
   $('dock-emojis').style.display=!isHost()&&phase==='signal'?'flex':'none';
   document.querySelectorAll('#dock-actions .act-btn,#dock-signals .sig-btn').forEach(b=>b.classList.remove('sel'));
-  myAction=null;myTarget=null;
+  hideAmbushPredict();
+  myAction=null;myTarget=null;myPredict=null;
   if(phase==='event'){
     $('ev-round').textContent='ROUND '+round+(round===rounds?' - FINAL':'');
     $('ev-name').textContent=curEvent.name;
@@ -814,7 +844,7 @@ function onPhase(m){
     if(round===rounds){fx.push({type:'flash',col:'255,59,92',t:0});beep(140,.5,'sawtooth',.06)}
   }
   if(phase==='signal'){hint('노드를 클릭해 <b>동맹 제안</b>·<b>경고</b>를 보내거나, 이모지로 의중을 흘리세요');beep(520,.07)}
-  if(phase==='action'){hint('이번 라운드 행동을 선택하세요 — <b>마감 전까지 변경 가능</b>');beep(660,.07)}
+  if(phase==='action'){hint(isClimaxRound()?'막판입니다 — 행동을 선택하세요. <b>매복</b>은 대상 행동을 맞히면 크레딧을 빼앗습니다':'이번 라운드 행동을 선택하세요 — <b>마감 전까지 변경 가능</b>');beep(660,.07)}
   renderBoard();
 }
 function hint(h){$('dock-hint').innerHTML=h}
@@ -894,6 +924,7 @@ function onLinkBroken(m){
 document.querySelectorAll('#dock-actions .act-btn').forEach(b=>{
   b.onclick=()=>{
     const act=b.dataset.act;
+    hideAmbushPredict();
     if(act==='hack'){
       selMode='hack';
       document.querySelectorAll('#dock-actions .act-btn').forEach(x=>x.classList.remove('sel'));
@@ -901,15 +932,35 @@ document.querySelectorAll('#dock-actions .act-btn').forEach(b=>{
       hint(`해킹할 <b>노드를 클릭</b>하세요 — 동맹 해킹 시 <b style="color:var(--red)">배신(${roomSettings.betraySteal||60}+신뢰 보너스 탈취 + 낙인)</b>`);
       return;
     }
+    if(act==='ambush'){
+      if(!isClimaxRound()){toast('매복은 마지막 2라운드에 열립니다');return}
+      selMode='ambushTarget';
+      document.querySelectorAll('#dock-actions .act-btn').forEach(x=>x.classList.remove('sel'));
+      b.classList.add('sel');
+      hint('매복할 <b>노드를 클릭</b>하세요');
+      return;
+    }
     selMode=null;
     send({t:'action',act});
   };
 });
+document.querySelectorAll('#ambush-predict .predict-btn').forEach(b=>{
+  b.onclick=()=>{
+    const predict=b.dataset.predict;
+    document.querySelectorAll('#ambush-predict .predict-btn').forEach(x=>x.classList.toggle('sel',x===b));
+    if(!pendingAmbushTarget){toast('먼저 매복 대상을 선택하세요');return}
+    send({t:'action',act:'ambush',target:pendingAmbushTarget,predict});
+    selMode=null;
+    hideAmbushPredict();
+  };
+});
 function onActionOk(m){
-  myAction=m.act;myTarget=m.target;
+  myAction=m.act;myTarget=m.target;myPredict=m.predict||null;
+  hideAmbushPredict();
   document.querySelectorAll('#dock-actions .act-btn').forEach(x=>x.classList.toggle('sel',x.dataset.act===m.act));
   const t=m.target?players.get(m.target):null;
-  hint(`✅ <b>${{mine:'⛏ 채굴',wall:'🛡 방화벽',hack:'⚡ 해킹'}[m.act]}${t?' → '+esc(t.name):''}</b> 전송됨 — 마감 전까지 변경 가능`);
+  const prediction=myPredict?` · 예측 ${actionText(myPredict)}`:'';
+  hint(`✅ <b>${actionText(m.act)}${t?' → '+esc(t.name):''}${prediction}</b> 전송됨 — 마감 전까지 변경 가능`);
   beep(980,.06,'sine',.05);
 }
 
@@ -936,6 +987,12 @@ cv.addEventListener('pointerdown',e=>{
   } else if(phase==='action'&&selMode==='hack'){
     send({t:'action',act:'hack',target:best.id});
     selMode=null;
+  } else if(phase==='action'&&selMode==='ambushTarget'){
+    pendingAmbushTarget=best.id;
+    selected=best.id;
+    selMode='ambushPredict';
+    showAmbushPredict();
+    hint(`<b>${esc(best.name)}</b>의 행동을 예측하세요`);
   } else {
     selected=best.id===selected?null:best.id;
   }
@@ -954,12 +1011,16 @@ function onResolve(m){
   $('rejoin-card').style.display=isHost()?'none':'flex';
   $('dock').style.display=isHost()?'none':'flex';
   $('dock-actions').style.display='none';$('dock-signals').style.display='none';$('dock-emojis').style.display='none';
+  hideAmbushPredict();
   hint('정산 중...');
-  const newCredits=new Map(m.players.map(p=>[p.id,p.credits]));
   // 로그 순차 재생
+  const ambushes=m.logs.filter(l=>l.type==='ambush');
   const hacks=m.logs.filter(l=>l.type==='hack'||l.type==='blocked');
-  const rest=m.logs.filter(l=>l.type!=='hack'&&l.type!=='blocked');
+  const rest=m.logs.filter(l=>l.type!=='ambush'&&l.type!=='hack'&&l.type!=='blocked');
   let delay=400;
+  ambushes.forEach(l=>{
+    setTimeout(()=>playLog(l),delay);delay+=620;
+  });
   hacks.forEach(l=>{
     setTimeout(()=>playLog(l),delay);delay+=560;
   });
@@ -974,7 +1035,32 @@ function onResolve(m){
 }
 function playLog(l){
   const f=players.get(l.from),t=l.to?players.get(l.to):null;
-  if(l.type==='hack'){
+  if(l.type==='ambush'){
+    if(l.success){
+      if(f&&t)fx.push({type:'bolt',a:l.from,b:l.to,t:0,betrayal:true});
+      if(t){
+        t.disp=Math.max(0,t.disp-l.amount);
+        float(t.x,t.y,'-'+l.amount,'#ff3b5c',true);
+        t.flash={t:0,col:'#ff2e97'};
+      }
+      if(f){
+        f.disp+=l.amount;
+        float(f.x,f.y-22,'+'+l.amount+(l.belowCutoff?' 추격':''),'#ffd166',true);
+        f.flash={t:0,col:'#ffd166'};
+      }
+      feed(`🎯 매복 성공! ${f?f.name:'?'} → ${t?t.name:'?'} ${actionText(l.actual)} 예측 · ${l.amount}C 탈취${l.belowCutoff?' · 생존선 추격':''}`,'warn');
+      beep(760,.12,'triangle',.055);
+    } else {
+      if(f){
+        f.disp=Math.max(0,f.disp-l.penalty);
+        float(f.x,f.y,'-'+l.penalty,'#ff3b5c',true);
+        fx.push({type:'shock',x:f.x,y:f.y,t:0});
+        f.flash={t:0,col:'#ff3b5c'};
+      }
+      feed(`🎯 매복 실패! ${f?f.name:'?'}의 ${actionText(l.predict)} 예측 빗나감${t&&l.actual?' · 실제 '+actionText(l.actual):''} · -${l.penalty}C`,'bad');
+      beep(150,.22,'sawtooth',.05);
+    }
+  } else if(l.type==='hack'){
     const col=l.betrayal?'#ff2e97':'#ff3b5c';
     fx.push({type:'bolt',a:l.from,b:l.to,t:0,betrayal:l.betrayal});
     if(t){
@@ -1449,7 +1535,7 @@ window.render_game_to_text=()=>JSON.stringify({
     id:p.id,name:p.name,bot:p.bot,credits:p.credits,connected:p.connected,traitor:p.traitor,
     links:p.links||[]
   })),
-  selected, myAction, myTarget
+  selected, myAction, myTarget, myPredict
 });
 window.advanceTime=ms=>new Promise(resolve=>setTimeout(resolve,Math.max(0,ms||0)));
 </script>
