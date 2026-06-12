@@ -1,4 +1,4 @@
-/* 서버 로직 자동 검증: 방 생성 → 봇 19명 → 게임 시작 → 종료까지 관찰 */
+/* 서버 로직 자동 검증: 방장 생성 → 봇 20명 → 게임 시작 → 종료까지 관찰 */
 const WebSocket = require('ws');
 const ws = new WebSocket('ws://localhost:3000');
 let phases = 0, resolves = 0, linksFormed = 0, betrayals = 0;
@@ -8,7 +8,7 @@ ws.on('message', (raw) => {
   const m = JSON.parse(raw);
   if (m.t === 'joined') {
     console.log('방 생성됨:', m.code);
-    for (let i = 0; i < 19; i++) ws.send(JSON.stringify({ t: 'addBot' }));
+    for (let i = 0; i < 20; i++) ws.send(JSON.stringify({ t: 'addBot' }));
     setTimeout(() => ws.send(JSON.stringify({ t: 'start' })), 300);
   }
   if (m.t === 'room') console.log('로비 인원:', m.players.length);

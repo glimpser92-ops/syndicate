@@ -60,6 +60,54 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:98;
 .btn:disabled{opacity:.35;cursor:default;box-shadow:none}
 .row{display:flex;gap:10px}.row .btn{margin-top:10px}
 
+#screen-home{padding:28px 18px;overflow-y:auto;justify-content:center}
+.home-grid{display:grid;grid-template-columns:minmax(300px,420px) minmax(420px,560px);gap:18px;align-items:start;width:min(1010px,96vw)}
+.tutorial-panel{background:var(--panel);border:1px solid rgba(255,46,151,.25);border-radius:14px;
+  padding:22px 24px;backdrop-filter:blur(8px);
+  box-shadow:0 0 40px rgba(255,46,151,.07), inset 0 0 30px rgba(255,46,151,.025)}
+.tutorial-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:14px}
+.tutorial-head h2{font-size:19px;color:#fff;letter-spacing:.08em}
+.tutorial-head p{margin-top:5px;color:var(--dim);font-size:12.5px;line-height:1.55}
+.eyebrow{font:700 10px 'Share Tech Mono',monospace;color:var(--magenta);letter-spacing:.24em}
+.tut-badge{font:700 11px 'Share Tech Mono',monospace;color:var(--gold);border:1px solid rgba(255,209,102,.45);
+  border-radius:99px;padding:5px 9px;background:rgba(255,209,102,.07);white-space:nowrap}
+.tutorial-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:16px;align-items:stretch}
+.sim-stage{position:relative;min-height:248px;border:1px solid rgba(0,229,255,.22);border-radius:12px;
+  background:
+    linear-gradient(rgba(0,229,255,.045) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,229,255,.045) 1px,transparent 1px),
+    radial-gradient(circle at 50% 45%,rgba(0,229,255,.1),transparent 58%);
+  background-size:34px 34px,34px 34px,100% 100%;overflow:hidden}
+.sim-stage::after{content:'';position:absolute;inset:14px;border:1px dashed rgba(90,106,143,.28);border-radius:50%;pointer-events:none}
+.sim-link{position:absolute;left:22%;top:44%;width:38%;height:2px;background:linear-gradient(90deg,var(--green),rgba(61,255,180,.15));
+  box-shadow:0 0 12px rgba(61,255,180,.55);transform:rotate(-20deg);transform-origin:left center}
+.sim-link.broken{background:linear-gradient(90deg,var(--red),rgba(255,59,92,.12));box-shadow:0 0 14px rgba(255,59,92,.55)}
+.sim-node{position:absolute;width:84px;min-height:72px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  border:1px solid var(--cyan);border-radius:12px;background:rgba(5,9,22,.92);color:#c9d8f5;text-align:center;
+  box-shadow:0 0 18px rgba(0,229,255,.22);transition:transform .25s,box-shadow .25s,border-color .25s}
+.sim-node .avatar{font-size:22px;line-height:1}
+.sim-node .name{font-size:10px;font-weight:900;letter-spacing:.08em}
+.sim-node .credit{font:700 13px 'Share Tech Mono',monospace;color:var(--cyan)}
+.sim-node.me{left:11%;top:36%;border-color:var(--magenta);box-shadow:0 0 22px rgba(255,46,151,.32)}
+.sim-node.ally{left:48%;top:22%;border-color:var(--green);box-shadow:0 0 18px rgba(61,255,180,.24)}
+.sim-node.rival{right:10%;top:45%;border-color:var(--red);box-shadow:0 0 18px rgba(255,59,92,.22)}
+.sim-node.guard{left:43%;bottom:10%;border-color:var(--cyan)}
+.sim-node.bump{transform:scale(1.08);box-shadow:0 0 28px rgba(255,209,102,.45)}
+.sim-node.hit{transform:scale(.94);border-color:var(--red);box-shadow:0 0 24px rgba(255,59,92,.48)}
+.sim-note{position:absolute;left:12px;right:12px;bottom:10px;color:var(--dim);font-size:11px;text-align:center}
+.sim-guide{display:flex;flex-direction:column;gap:10px}
+.rule-flow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.rule-chip{border:1px solid rgba(0,229,255,.18);border-radius:9px;padding:8px;background:rgba(0,229,255,.045)}
+.rule-chip b{display:block;color:#fff;font-size:12px;margin-bottom:3px}
+.rule-chip span{display:block;color:var(--dim);font-size:11px;line-height:1.35}
+.tut-explain{min-height:112px;border-left:2px solid var(--magenta);padding:10px 12px;background:rgba(255,46,151,.055);border-radius:0 10px 10px 0}
+.tut-explain h3{font-size:14px;color:#fff;margin-bottom:6px}
+.tut-explain p{font-size:12.5px;color:var(--text);line-height:1.55}
+.tut-log{font:700 12px 'Share Tech Mono','Noto Sans KR',sans-serif;color:var(--gold);min-height:18px}
+.tut-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.tut-choice{min-width:0;margin:0;padding:10px 8px;font-size:13px;border-radius:9px}
+.tut-choice.sel::after{content:'';position:absolute;left:10px;right:10px;bottom:5px;height:2px;background:currentColor;box-shadow:0 0 10px currentColor}
+
 .lobby-list{display:grid;grid-template-columns:1fr 1fr;gap:7px;max-height:42vh;overflow-y:auto;margin:14px 0}
 .lobby-p{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;
   background:rgba(0,229,255,.05);border:1px solid rgba(0,229,255,.14);font-size:14px;
@@ -79,6 +127,16 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:98;
 .mini-btn{flex:none;padding:10px 12px;border-radius:8px;border:1px solid rgba(0,229,255,.35);
   color:var(--cyan);background:rgba(0,229,255,.07);font-size:12px;font-weight:700}
 .mini-btn:hover{background:rgba(0,229,255,.18);box-shadow:0 0 16px rgba(0,229,255,.22)}
+.host-note{display:none;margin:10px 0 2px;padding:9px 11px;border:1px solid rgba(255,209,102,.36);
+  border-radius:9px;background:rgba(255,209,102,.06);color:var(--gold);font-size:12px;line-height:1.45}
+.settings-box{display:none;margin-top:12px;padding:12px;border:1px solid rgba(0,229,255,.22);border-radius:10px;background:rgba(0,10,25,.36)}
+.settings-title{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px;
+  font:700 11px 'Share Tech Mono','Noto Sans KR',sans-serif;color:var(--cyan);letter-spacing:.18em}
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.rule-field{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 8px;border-radius:8px;
+  background:rgba(255,255,255,.035);border:1px solid rgba(120,140,190,.16)}
+.rule-field span{font-size:11px;color:var(--dim)}
+.rule-field input{width:64px;margin:0;padding:7px 8px;border-radius:7px;font-size:13px;text-align:right;letter-spacing:0}
 
 /* ===== 게임 화면 ===== */
 #screen-game{display:none;justify-content:flex-start;align-items:stretch}
@@ -108,6 +166,26 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:98;
   text-shadow:0 0 24px var(--gold),0 0 70px rgba(255,209,102,.5)}
 #event-banner .ev-desc{margin-top:8px;font-size:clamp(14px,2.5vw,19px);color:var(--gold);letter-spacing:.06em}
 #event-banner .ev-round{font-size:12px;color:var(--dim);letter-spacing:.4em;margin-bottom:10px}
+
+#rejoin-card{position:absolute;left:10px;top:64px;z-index:22;display:none;align-items:center;gap:8px;
+  background:var(--panel);border:1px solid rgba(255,209,102,.34);border-radius:10px;padding:8px 10px;backdrop-filter:blur(6px)}
+#rejoin-card span{font:700 10px 'Share Tech Mono',monospace;color:var(--dim);letter-spacing:.2em}
+#rejoin-card b{font:900 20px 'Share Tech Mono',monospace;color:var(--gold);letter-spacing:.14em;text-shadow:0 0 12px rgba(255,209,102,.5)}
+#host-monitor{position:absolute;left:10px;top:64px;bottom:20px;width:286px;z-index:35;display:none;
+  background:rgba(10,14,30,.88);border:1px solid rgba(255,46,151,.3);border-radius:12px;padding:12px;
+  overflow-y:auto;backdrop-filter:blur(8px);box-shadow:0 0 28px rgba(255,46,151,.12)}
+.monitor-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.monitor-head b{font-size:12px;color:#fff;letter-spacing:.18em}
+.monitor-head span{font-size:11px;color:var(--dim)}
+.monitor-code{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;margin-bottom:10px}
+.monitor-code strong{display:block;font:900 34px 'Share Tech Mono',monospace;color:var(--cyan);letter-spacing:.22em;text-shadow:0 0 18px rgba(0,229,255,.6)}
+.qr-img{width:88px;height:88px;border-radius:8px;border:1px solid rgba(0,229,255,.28);background:#fff;padding:4px}
+.monitor-link{display:flex;gap:7px;margin-bottom:10px}
+.monitor-link input{flex:1;min-width:0;padding:8px;border:1px solid rgba(0,229,255,.24);border-radius:7px;background:rgba(0,10,25,.72);color:var(--text);font-size:11px}
+.monitor-stats{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:10px}
+.monitor-stat{padding:8px;border:1px solid rgba(120,140,190,.18);border-radius:8px;background:rgba(255,255,255,.035)}
+.monitor-stat span{display:block;font-size:10px;color:var(--dim);letter-spacing:.12em}
+.monitor-stat b{display:block;margin-top:3px;font:900 17px 'Share Tech Mono',monospace;color:var(--cyan)}
 
 /* 리더보드 */
 #board{position:absolute;right:10px;top:64px;bottom:130px;width:212px;z-index:20;
@@ -155,7 +233,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:98;
 .toast{background:var(--panel);border:1px solid rgba(0,229,255,.35);padding:8px 18px;border-radius:99px;
   font-size:13px;animation:toastIn .25s both;backdrop-filter:blur(6px);box-shadow:0 0 18px rgba(0,229,255,.15)}
 @keyframes toastIn{from{transform:translateY(-12px);opacity:0}to{transform:none;opacity:1}}
-#proposals{position:absolute;left:10px;top:64px;z-index:40;display:flex;flex-direction:column;gap:8px;max-width:230px}
+#proposals{position:absolute;left:10px;top:112px;z-index:40;display:flex;flex-direction:column;gap:8px;max-width:230px}
 .prop{background:var(--panel);border:1px solid var(--green);border-radius:11px;padding:10px 13px;
   animation:popIn .3s both;box-shadow:0 0 22px rgba(61,255,180,.2)}
 .prop p{font-size:13px;margin-bottom:8px}
@@ -194,11 +272,28 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:98;
 @keyframes shake{0%,100%{transform:none}20%{transform:translate(-7px,4px)}40%{transform:translate(6px,-5px)}60%{transform:translate(-5px,-3px)}80%{transform:translate(4px,3px)}}
 
 @media(max-width:760px){
+  #screen-home{justify-content:flex-start;padding:20px 12px}
+  .subtitle{margin-bottom:18px}
+  .home-grid{grid-template-columns:1fr;width:min(440px,96vw)}
+  .tutorial-panel{padding:18px}
+  .tutorial-grid{grid-template-columns:1fr}
+  .sim-stage{min-height:226px}
+  .rule-flow{grid-template-columns:1fr 1fr}
+  .settings-grid{grid-template-columns:1fr}
+  #host-monitor{right:10px;width:auto;bottom:130px}
+  #rejoin-card{left:10px;right:10px;justify-content:center}
   #board{display:none}
   #board.open{display:block;transform:none;left:auto}
   #board-toggle{display:block}
   .act-btn{min-width:88px;padding:10px 12px;font-size:13px}
   #feed{bottom:150px;max-height:22vh}
+}
+@media(max-width:420px){
+  .row{flex-direction:column;gap:0}
+  .row .btn{margin-top:0}
+  .tutorial-head{flex-direction:column}
+  .rule-flow,.tut-actions{grid-template-columns:1fr}
+  .sim-node{width:76px}
 }
 </style>
 </head>
@@ -208,20 +303,61 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:98;
 <div class="screen on" id="screen-home">
   <div class="title orb" data-t="NEON SYNDICATE">NEON <b>SYNDICATE</b></div>
   <div class="subtitle orb">ALLY &nbsp;·&nbsp; BETRAY &nbsp;·&nbsp; SURVIVE</div>
-  <div class="card">
-    <input id="in-name" maxlength="10" placeholder="핸들 입력 (최대 10자)">
-    <button class="btn btn-cyan orb" id="bt-create">새 신디케이트 개설</button>
-    <div class="row">
-      <input id="in-code" maxlength="4" placeholder="방 코드" style="text-transform:uppercase;flex:1;margin:10px 0 0">
-      <button class="btn btn-mag orb" id="bt-join" style="flex:1">접속</button>
+  <div class="home-grid">
+    <div class="card">
+      <input id="in-name" maxlength="10" placeholder="핸들 입력 (최대 10자)">
+      <button class="btn btn-cyan orb" id="bt-create">새 신디케이트 개설</button>
+      <div class="row">
+        <input id="in-code" maxlength="4" placeholder="방 코드" style="text-transform:uppercase;flex:1;margin:10px 0 0">
+        <button class="btn btn-mag orb" id="bt-join" style="flex:1">접속</button>
+      </div>
+      <p style="margin-top:16px;font-size:11.5px;color:var(--dim);line-height:1.7">
+        4~20명 · 7라운드 · 약 10분<br>
+        <span style="color:var(--green)">⛏ 채굴</span>은 <span style="color:var(--cyan)">🛡 방화벽</span>보다 벌고,
+        <span style="color:var(--red)">⚡ 해킹</span>은 채굴자를 털고, 방화벽은 해커를 반격합니다.<br>
+        동맹과 함께 채굴하면 보너스 — 동맹을 배신하면 2배 탈취, 그러나 낙인이 찍힙니다.<br>
+        최종 <b style="color:var(--gold)">상위 20%만 생존</b>합니다.
+      </p>
     </div>
-    <p style="margin-top:16px;font-size:11.5px;color:var(--dim);line-height:1.7">
-      4~20명 · 7라운드 · 약 10분<br>
-      <span style="color:var(--green)">⛏ 채굴</span>은 <span style="color:var(--cyan)">🛡 방화벽</span>보다 벌고,
-      <span style="color:var(--red)">⚡ 해킹</span>은 채굴자를 털고, 방화벽은 해커를 반격합니다.<br>
-      동맹과 함께 채굴하면 보너스 — 동맹을 배신하면 2배 탈취, 그러나 낙인이 찍힙니다.<br>
-      최종 <b style="color:var(--gold)">상위 20%만 생존</b>합니다.
-    </p>
+    <section class="tutorial-panel" aria-label="규칙 예시 시뮬레이션">
+      <div class="tutorial-head">
+        <div>
+          <div class="eyebrow">TRAINING SIM</div>
+          <h2 class="orb">1턴 예시 시뮬레이션</h2>
+          <p>아래 행동을 눌러 점수가 어떻게 움직이는지 먼저 확인하세요.</p>
+        </div>
+        <div class="tut-badge">START 100C</div>
+      </div>
+      <div class="tutorial-grid">
+        <div class="sim-stage" id="tut-stage">
+          <div class="sim-link" id="tut-link"></div>
+          <div class="sim-node me" id="tut-me"><span class="avatar">🦊</span><span class="name">YOU</span><span class="credit">100C</span></div>
+          <div class="sim-node ally" id="tut-ally"><span class="avatar">🤝</span><span class="name">ALLY</span><span class="credit">100C</span></div>
+          <div class="sim-node rival" id="tut-rival"><span class="avatar">😈</span><span class="name">RIVAL</span><span class="credit">100C</span></div>
+          <div class="sim-node guard" id="tut-guard"><span class="avatar">🛡️</span><span class="name">GUARD</span><span class="credit">100C</span></div>
+          <div class="sim-note" id="tut-note">동맹선은 초록색, 배신하면 붉게 끊어집니다.</div>
+        </div>
+        <div class="sim-guide">
+          <div class="rule-flow">
+            <div class="rule-chip"><b>1. 신호</b><span>동맹을 제안하거나 경고를 보냅니다.</span></div>
+            <div class="rule-chip"><b>2. 행동</b><span>채굴, 방화벽, 해킹 중 하나를 고릅니다.</span></div>
+            <div class="rule-chip"><b>3. 정산</b><span>선택이 동시에 공개되고 크레딧이 바뀝니다.</span></div>
+            <div class="rule-chip"><b>4. 생존</b><span>7라운드 뒤 상위 20%만 살아남습니다.</span></div>
+          </div>
+          <div class="tut-explain">
+            <h3 id="tut-title">채굴 예시</h3>
+            <p id="tut-body">당신과 동맹이 같이 채굴하면 기본 30C에 동맹 보너스 15C가 붙습니다. 안전한 판에서는 가장 꾸준한 선택입니다.</p>
+          </div>
+          <div class="tut-log" id="tut-log">YOU +45C · ALLY +45C</div>
+        </div>
+      </div>
+      <div class="tut-actions">
+        <button class="act-btn act-mine tut-choice sel" data-tutorial="mine">⛏ 채굴<small>동맹 보너스</small></button>
+        <button class="act-btn act-wall tut-choice" data-tutorial="wall">🛡 방화벽<small>해킹 반격</small></button>
+        <button class="act-btn act-hack tut-choice" data-tutorial="hack">⚡ 해킹<small>채굴자 탈취</small></button>
+        <button class="act-btn act-hack tut-choice" data-tutorial="betray">💔 배신<small>동맹 해킹</small></button>
+      </div>
+    </section>
   </div>
 </div>
 
@@ -238,6 +374,20 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:98;
       <div class="share-line">
         <input id="lobby-link" readonly value="">
         <button class="mini-btn" id="bt-copy-link">링크 복사</button>
+      </div>
+    </div>
+    <div class="host-note" id="host-note">방장은 게임에 참여하지 않고 진행 상황만 봅니다. 아래 학생 수만 참가 인원으로 계산됩니다.</div>
+    <div class="settings-box host-settings" id="lobby-settings">
+      <div class="settings-title"><span>HOST RULES</span><span id="settings-status">SYNC</span></div>
+      <div class="settings-grid">
+        <label class="rule-field"><span>동맹 한도</span><input type="number" data-rule="maxLinks" min="1" max="5"></label>
+        <label class="rule-field"><span>라운드</span><input type="number" data-rule="rounds" min="3" max="12"></label>
+        <label class="rule-field"><span>생존 %</span><input type="number" data-rule="winnersPercent" min="10" max="50" step="5"></label>
+        <label class="rule-field"><span>채굴</span><input type="number" data-rule="mineBase" min="10" max="80"></label>
+        <label class="rule-field"><span>해킹</span><input type="number" data-rule="steal" min="10" max="100"></label>
+        <label class="rule-field"><span>배신</span><input type="number" data-rule="betraySteal" min="20" max="140"></label>
+        <label class="rule-field"><span>신호 초</span><input type="number" data-rule="signalSeconds" min="8" max="60"></label>
+        <label class="rule-field"><span>행동 초</span><input type="number" data-rule="actionSeconds" min="8" max="60"></label>
       </div>
     </div>
     <div class="lobby-list" id="lobby-list"></div>
@@ -266,6 +416,40 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:98;
     <div class="ev-name orb" id="ev-name"></div>
     <div class="ev-desc" id="ev-desc"></div>
   </div>
+  <div id="rejoin-card"><span>ROOM</span><b id="game-code">----</b><button class="mini-btn" id="bt-game-copy">링크</button></div>
+  <aside id="host-monitor">
+    <div class="monitor-head"><b class="orb">HOST MONITOR</b><span id="monitor-phase">대기</span></div>
+    <div class="monitor-code">
+      <div>
+        <span class="share-label">재접속 코드</span>
+        <strong id="monitor-code">----</strong>
+      </div>
+      <img class="qr-img" id="qr-img" alt="학생 접속 QR">
+    </div>
+    <div class="monitor-link">
+      <input id="game-link" readonly value="">
+      <button class="mini-btn" id="bt-monitor-copy">복사</button>
+    </div>
+    <div class="monitor-stats">
+      <div class="monitor-stat"><span>STUDENTS</span><b id="mon-count">0/20</b></div>
+      <div class="monitor-stat"><span>SURVIVE</span><b id="mon-survive">0</b></div>
+      <div class="monitor-stat"><span>ROUND</span><b id="mon-round">0/7</b></div>
+      <div class="monitor-stat"><span>ONLINE</span><b id="mon-online">0</b></div>
+    </div>
+    <div class="settings-box host-settings" id="game-settings">
+      <div class="settings-title"><span>LIVE RULES</span><span>APPLY</span></div>
+      <div class="settings-grid">
+        <label class="rule-field"><span>동맹 한도</span><input type="number" data-rule="maxLinks" min="1" max="5"></label>
+        <label class="rule-field"><span>라운드</span><input type="number" data-rule="rounds" min="3" max="12"></label>
+        <label class="rule-field"><span>생존 %</span><input type="number" data-rule="winnersPercent" min="10" max="50" step="5"></label>
+        <label class="rule-field"><span>채굴</span><input type="number" data-rule="mineBase" min="10" max="80"></label>
+        <label class="rule-field"><span>해킹</span><input type="number" data-rule="steal" min="10" max="100"></label>
+        <label class="rule-field"><span>배신</span><input type="number" data-rule="betraySteal" min="20" max="140"></label>
+        <label class="rule-field"><span>신호 초</span><input type="number" data-rule="signalSeconds" min="8" max="60"></label>
+        <label class="rule-field"><span>행동 초</span><input type="number" data-rule="actionSeconds" min="8" max="60"></label>
+      </div>
+    </div>
+  </aside>
   <button id="board-toggle">📊 순위</button>
   <div id="board"><h3 class="orb">RANKING</h3><div id="board-rows"></div></div>
   <div id="proposals"></div>
@@ -301,13 +485,22 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:98;
 <script>
 /* ================= 상태 ================= */
 let ws=null, myId=null, hostId=null, roomCode='';
+let myRole='player', playerToken='', hostToken='';
 let players=new Map(), order=[], links=new Set();
 let phase='lobby', phaseEnds=0, phaseDur=1, round=1, rounds=7;
 let curEvent={name:'표준 프로토콜'}, bounty=null, winnersN=4;
 let selected=null, selMode=null, myAction=null, myTarget=null;
+let roomSettings={}, maxPlayers=20, minPlayers=4;
 const $=id=>document.getElementById(id);
 const linkKey=(a,b)=>[a,b].sort().join('|');
 const cleanCode=v=>String(v||'').toUpperCase().replace(/[^A-Z2-9]/g,'').slice(0,4);
+const isHost=()=>myRole==='host';
+const playerTokenKey=code=>'neon-player-token:'+code;
+const hostTokenKey=code=>'neon-host-token:'+code;
+const storedPlayerToken=code=>{try{return localStorage.getItem(playerTokenKey(code))||''}catch(e){return ''}};
+const storedHostToken=code=>{try{return localStorage.getItem(hostTokenKey(code))||''}catch(e){return ''}};
+const storePlayerToken=(code,t)=>{try{if(code&&t)localStorage.setItem(playerTokenKey(code),t)}catch(e){}};
+const storeHostToken=(code,t)=>{try{if(code&&t)localStorage.setItem(hostTokenKey(code),t)}catch(e){}};
 
 function roomLink(code=roomCode){
   const url=new URL(location.href);
@@ -329,6 +522,24 @@ function fallbackCopy(txt,label){
   document.body.appendChild(t);t.select();
   try{document.execCommand('copy');toast(label)}catch(e){toast('직접 선택해 복사하세요')}
   t.remove();
+}
+
+function updateInviteViews(code=roomCode){
+  if(!code)return;
+  const link=roomLink(code);
+  if($('lobby-link'))$('lobby-link').value=link;
+  if($('game-link'))$('game-link').value=link;
+  if($('game-code'))$('game-code').textContent=code;
+  if($('monitor-code'))$('monitor-code').textContent=code;
+  if($('qr-img'))$('qr-img').src='https://api.qrserver.com/v1/create-qr-code/?size=176x176&margin=8&data='+encodeURIComponent(link);
+}
+
+function applySettings(settings={}){
+  roomSettings={...roomSettings,...settings};
+  document.querySelectorAll('[data-rule]').forEach(input=>{
+    const key=input.dataset.rule;
+    if(Object.prototype.hasOwnProperty.call(roomSettings,key)&&document.activeElement!==input)input.value=roomSettings[key];
+  });
 }
 
 const invitedCode=cleanCode(new URLSearchParams(location.search).get('room')||new URLSearchParams(location.search).get('code'));
@@ -358,8 +569,12 @@ const send=m=>{if(ws&&ws.readyState===1)ws.send(JSON.stringify(m))};
 function handle(m){
   switch(m.t){
     case 'joined':
-      myId=m.you; roomCode=m.code; $('lobby-code').textContent=m.code; $('lobby-link').value=roomLink(m.code);
+      myId=m.you; roomCode=m.code; myRole=m.role||'player';
+      if(m.token){playerToken=m.token;storePlayerToken(roomCode,playerToken)}
+      if(m.hostToken){hostToken=m.hostToken;storeHostToken(roomCode,hostToken)}
+      $('lobby-code').textContent=m.code; updateInviteViews(m.code);
       show('screen-lobby');
+      if(m.rejoined)toast(isHost()?'방장 모니터에 다시 연결됨':'게임에 다시 접속했습니다');
       break;
     case 'error': toast(m.msg); break;
     case 'toast': toast(m.msg); break;
@@ -372,6 +587,7 @@ function handle(m){
     case 'actionOk': onActionOk(m); break;
     case 'resolve': onResolve(m); break;
     case 'over': onOver(m); break;
+    case 'settings': onSettings(m); break;
   }
 }
 
@@ -386,11 +602,14 @@ $('bt-create').onclick=()=>{const n=$('in-name').value.trim();if(!n){toast('핸�
   connect(()=>send({t:'create',name:n}))};
 $('bt-join').onclick=()=>{const n=$('in-name').value.trim(),c=$('in-code').value.trim().toUpperCase();
   if(!n){toast('핸들을 입력하세요');return} if(c.length!==4){toast('4자리 방 코드를 입력하세요');return}
-  connect(()=>send({t:'join',code:c,name:n}))};
+  connect(()=>send({t:'join',code:c,name:n,token:storedPlayerToken(c)}))};
 $('in-code').addEventListener('input',e=>e.target.value=cleanCode(e.target.value));
 $('lobby-code').onclick=()=>copyText(roomCode,'코드 복사됨!');
 $('bt-copy-link').onclick=()=>copyText(roomLink(),'학생 링크 복사됨!');
 $('lobby-link').onclick=()=>{$('lobby-link').select();copyText($('lobby-link').value,'학생 링크 복사됨!')};
+$('bt-game-copy').onclick=()=>copyText(roomLink(),'재접속 링크 복사됨!');
+$('bt-monitor-copy').onclick=()=>copyText(roomLink(),'학생 링크 복사됨!');
+$('game-link').onclick=()=>{$('game-link').select();copyText($('game-link').value,'학생 링크 복사됨!')};
 $('bt-addbot').onclick=()=>send({t:'addBot'});
 $('bt-rmbot').onclick=()=>send({t:'removeBot'});
 $('bt-start').onclick=()=>send({t:'start'});
@@ -399,33 +618,106 @@ if(invitedCode){
   $('in-code').value=invitedCode;
   $('bt-join').textContent='초대 방 접속';
   setTimeout(()=>toast('초대 코드가 입력되었습니다'),250);
+  const savedHost=storedHostToken(invitedCode);
+  if(savedHost)connect(()=>send({t:'rejoinHost',code:invitedCode,hostToken:savedHost}));
 }
+document.querySelectorAll('[data-rule]').forEach(input=>{
+  input.addEventListener('change',()=>{
+    if(!isHost())return;
+    const key=input.dataset.rule;
+    send({t:'settings',patch:{[key]:Number(input.value)}});
+  });
+});
+
+const tutorialCases={
+  mine:{
+    title:'채굴 예시',
+    body:'당신과 동맹이 같이 채굴하면 기본 30C에 동맹 보너스 15C가 붙습니다. 안전한 판에서는 가장 꾸준한 선택입니다.',
+    log:'YOU +45C · ALLY +45C',
+    note:'동맹과 같은 라운드에 채굴하면 서로 수익이 커집니다.',
+    scores:{me:145,ally:145,rival:110,guard:110},
+    bump:['me','ally'],hit:[],broken:false,
+  },
+  wall:{
+    title:'방화벽 예시',
+    body:'라이벌이 당신을 해킹했는데 방화벽을 켜 두면, 기본 10C에 반격 30C가 더해집니다. 공격받을 것 같을 때 강합니다.',
+    log:'YOU +40C · RIVAL -30C',
+    note:'방화벽은 덜 벌지만 해커를 역으로 털 수 있습니다.',
+    scores:{me:140,ally:130,rival:70,guard:100},
+    bump:['me'],hit:['rival'],broken:false,
+  },
+  hack:{
+    title:'해킹 예시',
+    body:'상대가 채굴 중이면 해킹으로 40C를 빼앗습니다. 선두를 해킹하면 현상금이 붙는 라운드도 있습니다.',
+    log:'YOU +40C · RIVAL -40C',
+    note:'해킹은 빠르게 따라잡지만 방화벽을 만나면 손해를 봅니다.',
+    scores:{me:140,ally:130,rival:60,guard:110},
+    bump:['me'],hit:['rival'],broken:false,
+  },
+  betray:{
+    title:'배신 예시',
+    body:'동맹을 해킹하면 60C를 빼앗고 동맹선이 끊어집니다. 대신 다음 라운드에 배신자 낙인이 찍혀 표적이 되기 쉽습니다.',
+    log:'YOU +60C · ALLY -60C · 배신자 낙인',
+    note:'배신은 크게 벌 수 있지만 이후 협상과 생존이 어려워집니다.',
+    scores:{me:160,ally:40,rival:110,guard:110},
+    bump:['me'],hit:['ally'],broken:true,
+  },
+};
+let tutorialChoice='mine';
+
+function setTutorial(kind='mine',sound=false){
+  const t=tutorialCases[kind]||tutorialCases.mine;
+  tutorialChoice=kind;
+  $('tut-title').textContent=t.title;
+  $('tut-body').textContent=t.body;
+  $('tut-log').textContent=t.log;
+  $('tut-note').textContent=t.note;
+  $('tut-link').classList.toggle('broken',!!t.broken);
+  ['me','ally','rival','guard'].forEach(id=>{
+    const node=$('tut-'+id);
+    node.querySelector('.credit').textContent=t.scores[id]+'C';
+    node.classList.remove('bump','hit');
+    if(t.bump.includes(id))node.classList.add('bump');
+    if(t.hit.includes(id))node.classList.add('hit');
+  });
+  document.querySelectorAll('.tut-choice').forEach(b=>b.classList.toggle('sel',b.dataset.tutorial===kind));
+  if(sound)beep(kind==='betray'?150:kind==='wall'?560:kind==='hack'?300:760,.08,kind==='mine'?'sine':'square',.035);
+}
+
+document.querySelectorAll('.tut-choice').forEach(b=>{
+  b.onclick=()=>setTutorial(b.dataset.tutorial,true);
+});
+setTutorial();
 
 function onRoom(m){
   hostId=m.hostId;
+  maxPlayers=m.max||20;minPlayers=m.min||4;winnersN=m.winnersN||winnersN;
+  if(m.settings)applySettings(m.settings);
   setPlayers(m.players);
+  updateInviteViews(m.code);
+  updateMonitor();
   if(m.state==='lobby'){
     show('screen-lobby');
-    $('lobby-link').value=roomLink(m.code);
     const list=$('lobby-list');list.innerHTML='';
     m.players.forEach(p=>{
       const d=document.createElement('div');
       d.className='lobby-p'+(p.bot?' bot':'');
       d.innerHTML=`<span class="dot"></span><span>${esc(p.name)}</span>`+
-        (p.id===m.hostId?'<span class="host-tag">HOST</span>':'')+
         (p.id===myId?'<span class="host-tag" style="color:var(--magenta)">YOU</span>':'');
       list.appendChild(d);
     });
-    const isHost=myId===m.hostId;
-    $('host-tools').style.display=isHost?'flex':'none';
-    $('share-box').style.display=isHost?'block':'none';
-    $('bt-start').style.display=isHost?'block':'none';
+    const host=isHost();
+    $('host-tools').style.display=host?'flex':'none';
+    $('share-box').style.display=host?'block':'none';
+    $('host-note').style.display=host?'block':'none';
+    document.querySelectorAll('.host-settings').forEach(x=>x.style.display=host?'block':'none');
+    $('bt-start').style.display=host?'block':'none';
     $('bt-start').disabled=m.players.length<m.min;
-    $('lobby-hint').textContent=isHost
+    $('lobby-hint').textContent=host
       ? (m.players.length<m.min
-        ?`최소 ${m.min}명 필요 (현재 ${m.players.length}명) — 링크를 공유하거나 봇으로 채울 수 있습니다`
-        :`${m.players.length}/${m.max}명 — 준비 완료`)
-      :`${m.players.length}/${m.max}명 입장 — 방장이 시작하면 자동으로 게임에 들어갑니다`;
+        ?`학생 최소 ${m.min}명 필요 (현재 ${m.players.length}명) — 링크를 공유하거나 봇으로 채울 수 있습니다`
+        :`학생 ${m.players.length}/${m.max}명 — 시작 가능`)
+      :`학생 ${m.players.length}/${m.max}명 입장 — 방장이 시작하면 자동으로 게임에 들어갑니다`;
   }
 }
 
@@ -457,24 +749,41 @@ function layout(){
   });
 }
 
+function updateMonitor(){
+  const online=[...players.values()].filter(p=>p.connected).length;
+  const total=players.size;
+  if($('mon-count'))$('mon-count').textContent=`${total}/${maxPlayers}`;
+  if($('mon-online'))$('mon-online').textContent=String(online);
+  if($('mon-survive'))$('mon-survive').textContent=String(winnersN);
+  if($('mon-round'))$('mon-round').textContent=`${round}/${rounds}`;
+  if($('monitor-phase'))$('monitor-phase').textContent=PHASE_KO[phase]||phase;
+}
+
 /* ================= 페이즈 ================= */
 const PHASE_KO={event:'이벤트',signal:'신호 교환',action:'행동 결정',resolve:'정산'};
 function onPhase(m){
   show('screen-game');
   phase=m.phase;phaseEnds=m.ends;phaseDur=m.duration;round=m.round;rounds=m.rounds;
   curEvent=m.event;bounty=m.bounty;winnersN=m.winnersN;
+  if(m.settings)applySettings(m.settings);
   setPlayers(m.players);
+  updateInviteViews(roomCode);
+  updateMonitor();
   selected=null;selMode=null;
   $('round-tag').innerHTML=`ROUND <b>${round}</b>/${rounds}`;
   $('phase-tag').textContent=PHASE_KO[phase]||phase;
   $('event-chip').textContent=curEvent.name;
-  $('dock-actions').style.display=phase==='action'?'flex':'none';
-  $('dock-signals').style.display=phase==='signal'?'flex':'none';
-  $('dock-emojis').style.display=phase==='signal'?'flex':'none';
-  document.querySelectorAll('.act-btn,.sig-btn').forEach(b=>b.classList.remove('sel'));
+  $('host-monitor').style.display=isHost()?'block':'none';
+  document.querySelectorAll('.host-settings').forEach(x=>x.style.display=isHost()?'block':'none');
+  $('rejoin-card').style.display=isHost()?'none':'flex';
+  $('dock').style.display=isHost()?'none':'flex';
+  $('dock-actions').style.display=!isHost()&&phase==='action'?'flex':'none';
+  $('dock-signals').style.display=!isHost()&&phase==='signal'?'flex':'none';
+  $('dock-emojis').style.display=!isHost()&&phase==='signal'?'flex':'none';
+  document.querySelectorAll('#dock-actions .act-btn,#dock-signals .sig-btn').forEach(b=>b.classList.remove('sel'));
   myAction=null;myTarget=null;
   if(phase==='event'){
-    $('ev-round').textContent='ROUND '+round+(round===rounds?' — FINAL':'');
+    $('ev-round').textContent='ROUND '+round+(round===rounds?' - FINAL':'');
     $('ev-name').textContent=curEvent.name;
     $('ev-desc').textContent=curEvent.desc;
     const b=$('event-banner');b.classList.remove('show');void b.offsetWidth;b.classList.add('show');
@@ -487,6 +796,16 @@ function onPhase(m){
   renderBoard();
 }
 function hint(h){$('dock-hint').innerHTML=h}
+
+function onSettings(m){
+  if(m.settings)applySettings(m.settings);
+  if(m.players)setPlayers(m.players);
+  if(m.winnersN)winnersN=m.winnersN;
+  if(m.rounds)rounds=m.rounds;
+  updateMonitor();
+  renderBoard();
+  if(isHost())toast('규칙 업데이트됨');
+}
 
 /* ================= 신호 ================= */
 document.querySelectorAll('#dock-signals .sig-btn').forEach(b=>{
@@ -544,12 +863,12 @@ function onLinkBroken(m){
 }
 
 /* ================= 행동 ================= */
-document.querySelectorAll('.act-btn').forEach(b=>{
+document.querySelectorAll('#dock-actions .act-btn').forEach(b=>{
   b.onclick=()=>{
     const act=b.dataset.act;
     if(act==='hack'){
       selMode='hack';
-      document.querySelectorAll('.act-btn').forEach(x=>x.classList.remove('sel'));
+      document.querySelectorAll('#dock-actions .act-btn').forEach(x=>x.classList.remove('sel'));
       b.classList.add('sel');
       hint('해킹할 <b>노드를 클릭</b>하세요 — 동맹 해킹 시 <b style="color:var(--red)">배신(60 탈취 + 낙인)</b>');
       return;
@@ -560,7 +879,7 @@ document.querySelectorAll('.act-btn').forEach(b=>{
 });
 function onActionOk(m){
   myAction=m.act;myTarget=m.target;
-  document.querySelectorAll('.act-btn').forEach(x=>x.classList.toggle('sel',x.dataset.act===m.act));
+  document.querySelectorAll('#dock-actions .act-btn').forEach(x=>x.classList.toggle('sel',x.dataset.act===m.act));
   const t=m.target?players.get(m.target):null;
   hint(`✅ <b>${{mine:'⛏ 채굴',wall:'🛡 방화벽',hack:'⚡ 해킹'}[m.act]}${t?' → '+esc(t.name):''}</b> 전송됨 — 마감 전까지 변경 가능`);
   beep(980,.06,'sine',.05);
@@ -597,8 +916,13 @@ function feedSelf(){}
 
 /* ================= 정산 ================= */
 function onResolve(m){
-  phase='resolve';phaseEnds=m.ends;phaseDur=m.duration;bounty=m.bounty;winnersN=m.winnersN;
+  phase='resolve';phaseEnds=m.ends;phaseDur=m.duration;bounty=m.bounty;winnersN=m.winnersN;round=m.round;rounds=m.rounds||rounds;
+  if(m.settings)applySettings(m.settings);
   $('phase-tag').textContent=PHASE_KO.resolve;
+  $('host-monitor').style.display=isHost()?'block':'none';
+  document.querySelectorAll('.host-settings').forEach(x=>x.style.display=isHost()?'block':'none');
+  $('rejoin-card').style.display=isHost()?'none':'flex';
+  $('dock').style.display=isHost()?'none':'flex';
   $('dock-actions').style.display='none';$('dock-signals').style.display='none';$('dock-emojis').style.display='none';
   hint('정산 중...');
   const newCredits=new Map(m.players.map(p=>[p.id,p.credits]));
@@ -614,6 +938,7 @@ function onResolve(m){
   setTimeout(()=>{
     // 최종 수치 반영 (traitor 등 갱신)
     setPlayers(m.players);
+    updateMonitor();
     renderBoard();
   },Math.min(delay,m.duration-1500));
 }
@@ -657,9 +982,11 @@ function onOver(m){
   });
   const mine=m.winners.includes(myId);
   $('over-title').textContent=mine?'YOU SURVIVED':'SURVIVORS';
-  $('over-title').style.color=mine?'var(--gold)':'var(--dim)';
+  $('over-title').style.color=mine||isHost()?'var(--gold)':'var(--dim)';
   const myRank=ranked.findIndex(p=>p.id===myId)+1;
-  $('over-sub').textContent=mine?'신디케이트의 숙청에서 살아남았습니다.':`당신의 최종 순위: ${myRank}위 / ${ranked.length}명`;
+  $('over-sub').textContent=isHost()
+    ?`학생 ${ranked.length}명 중 생존자 ${m.winners.length}명`
+    :mine?'신디케이트의 숙청에서 살아남았습니다.':`당신의 최종 순위: ${myRank}위 / ${ranked.length}명`;
   show('screen-over');
   if(mine){beep(523,.15);setTimeout(()=>beep(659,.15),160);setTimeout(()=>beep(784,.3),320)}
   else beep(160,.5,'sawtooth',.05);
@@ -908,7 +1235,13 @@ requestAnimationFrame(draw);
 
 window.render_game_to_text=()=>JSON.stringify({
   screen:document.querySelector('.screen.on')?.id||'unknown',
-  roomCode, myId, hostId, phase, round, rounds,
+  tutorial:{
+    choice:tutorialChoice,
+    title:$('tut-title')?.textContent||'',
+    log:$('tut-log')?.textContent||'',
+  },
+  roomCode, myId, myRole, hostId, phase, round, rounds, maxPlayers, minPlayers,
+  settings:roomSettings,
   players:[...players.values()].map(p=>({
     id:p.id,name:p.name,bot:p.bot,credits:p.credits,connected:p.connected,traitor:p.traitor,
     links:p.links||[]
