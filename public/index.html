@@ -4,27 +4,29 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>NEON SYNDICATE</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Noto+Sans+KR:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Noto+Sans+KR:wght@400;500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#04060f; --panel:rgba(10,14,30,.82);
+  --bg:#04060f; --panel:rgba(12,18,38,.94); --panel-soft:rgba(14,22,44,.88);
+  --line:rgba(158,190,255,.28);
   --cyan:#00e5ff; --magenta:#ff2e97; --purple:#8b5cf6;
   --gold:#ffd166; --red:#ff3b5c; --green:#3dffb4;
-  --text:#d8e6ff; --dim:#5a6a8f;
+  --text:#eef6ff; --dim:#aebde0; --muted:#8293bd;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);
-  font-family:'Noto Sans KR',sans-serif;user-select:none}
+  font-family:'Noto Sans KR',sans-serif;line-height:1.55;font-weight:500;user-select:none;
+  text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased}
 button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
 .orb{font-family:'Orbitron','Noto Sans KR',sans-serif}
 .mono{font-family:'Share Tech Mono',monospace}
 
 /* ===== 스캔라인 & 비네트 ===== */
 body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:99;
-  background:repeating-linear-gradient(0deg,transparent 0 2px,rgba(0,0,0,.12) 2px 4px);
+  background:repeating-linear-gradient(0deg,transparent 0 2px,rgba(0,0,0,.055) 2px 4px);
   mix-blend-mode:multiply}
 body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:98;
-  background:radial-gradient(ellipse at center,transparent 55%,rgba(2,3,10,.75) 100%)}
+  background:radial-gradient(ellipse at center,transparent 63%,rgba(2,3,10,.55) 100%)}
 
 .screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;z-index:10}
 .screen.on{display:flex}
@@ -38,105 +40,130 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:98;
 .title::after{color:var(--magenta);animation:gl2 2.7s infinite steps(1);clip-path:inset(60% 0 10% 0)}
 @keyframes gl1{0%,93%{transform:none;opacity:0}94%{transform:translate(-4px,2px);opacity:.7}97%{transform:translate(3px,-1px)}100%{opacity:0}}
 @keyframes gl2{0%,89%{transform:none;opacity:0}90%{transform:translate(4px,-2px);opacity:.7}94%{transform:translate(-3px,1px)}100%{opacity:0}}
-.subtitle{margin:10px 0 36px;color:var(--dim);letter-spacing:.35em;font-size:13px}
+.subtitle{margin:10px 0 36px;color:#c8d5f4;letter-spacing:.24em;font-size:14px;font-weight:700;
+  text-shadow:0 0 12px rgba(0,229,255,.28)}
 
 /* ===== 홈/로비 ===== */
-.card{background:var(--panel);border:1px solid rgba(0,229,255,.25);border-radius:14px;
+.card{background:var(--panel);border:1px solid rgba(0,229,255,.38);border-radius:14px;
   padding:26px 30px;width:min(420px,92vw);backdrop-filter:blur(8px);
-  box-shadow:0 0 40px rgba(0,229,255,.08), inset 0 0 30px rgba(0,229,255,.03)}
+  box-shadow:0 0 40px rgba(0,229,255,.12), inset 0 0 30px rgba(0,229,255,.04)}
 .card input{width:100%;padding:13px 16px;margin-bottom:12px;border-radius:9px;
-  border:1px solid rgba(0,229,255,.3);background:rgba(0,10,25,.6);color:#fff;font-size:16px;outline:none;
+  border:1px solid rgba(0,229,255,.45);background:rgba(2,12,28,.88);color:#fff;font-size:16px;outline:none;
   font-family:'Share Tech Mono',monospace;letter-spacing:.1em}
 .card input:focus{border-color:var(--cyan);box-shadow:0 0 14px rgba(0,229,255,.3)}
 .btn{display:block;width:100%;padding:14px;border-radius:9px;font-size:16px;font-weight:700;
-  letter-spacing:.12em;margin-top:10px;transition:.15s;position:relative;overflow:hidden}
+  letter-spacing:.08em;margin-top:10px;transition:.15s;position:relative;overflow:hidden}
 .btn-cyan{background:linear-gradient(135deg,rgba(0,229,255,.18),rgba(0,229,255,.06));
   border:1px solid var(--cyan);color:var(--cyan);text-shadow:0 0 10px rgba(0,229,255,.6)}
 .btn-cyan:hover{background:rgba(0,229,255,.28);box-shadow:0 0 24px rgba(0,229,255,.35)}
 .btn-mag{background:linear-gradient(135deg,rgba(255,46,151,.18),rgba(255,46,151,.06));
   border:1px solid var(--magenta);color:var(--magenta);text-shadow:0 0 10px rgba(255,46,151,.6)}
 .btn-mag:hover{background:rgba(255,46,151,.28);box-shadow:0 0 24px rgba(255,46,151,.35)}
-.btn-ghost{border:1px solid rgba(120,140,190,.4);color:var(--dim);font-size:13px;padding:10px}
-.btn:disabled{opacity:.35;cursor:default;box-shadow:none}
+.btn-ghost{border:1px solid rgba(174,189,224,.5);color:var(--text);font-size:13.5px;padding:10px}
+.btn:disabled{opacity:.55;cursor:default;box-shadow:none}
 .row{display:flex;gap:10px}.row .btn{margin-top:10px}
 
-#screen-home{padding:28px 18px;overflow-y:auto;justify-content:center}
+#screen-home{padding:24px 18px 34px;overflow-y:auto;justify-content:flex-start}
 .home-grid{display:grid;grid-template-columns:minmax(300px,420px) minmax(420px,560px);gap:18px;align-items:start;width:min(1010px,96vw)}
-.tutorial-panel{background:var(--panel);border:1px solid rgba(255,46,151,.25);border-radius:14px;
+.tutorial-panel{background:var(--panel);border:1px solid rgba(255,46,151,.38);border-radius:14px;
   padding:22px 24px;backdrop-filter:blur(8px);
-  box-shadow:0 0 40px rgba(255,46,151,.07), inset 0 0 30px rgba(255,46,151,.025)}
+  box-shadow:0 0 40px rgba(255,46,151,.1), inset 0 0 30px rgba(255,46,151,.035)}
 .tutorial-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:14px}
-.tutorial-head h2{font-size:19px;color:#fff;letter-spacing:.08em}
-.tutorial-head p{margin-top:5px;color:var(--dim);font-size:12.5px;line-height:1.55}
-.eyebrow{font:700 10px 'Share Tech Mono',monospace;color:var(--magenta);letter-spacing:.24em}
-.tut-badge{font:700 11px 'Share Tech Mono',monospace;color:var(--gold);border:1px solid rgba(255,209,102,.45);
+.tutorial-head h2{font-size:20px;color:#fff;letter-spacing:.06em}
+.tutorial-head p{margin-top:5px;color:var(--dim);font-size:14px;line-height:1.65}
+.eyebrow{font:700 11px 'Share Tech Mono',monospace;color:var(--magenta);letter-spacing:.18em}
+.tut-badge{font:700 12px 'Share Tech Mono',monospace;color:var(--gold);border:1px solid rgba(255,209,102,.55);
   border-radius:99px;padding:5px 9px;background:rgba(255,209,102,.07);white-space:nowrap}
+.tut-meta{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 12px}
+.phase-pill,.status-chip{font:700 12px 'Share Tech Mono','Noto Sans KR',sans-serif;letter-spacing:.04em;border-radius:99px;
+  border:1px solid rgba(0,229,255,.42);background:rgba(0,229,255,.08);color:var(--cyan);padding:5px 9px}
+.status-chip.gold{border-color:rgba(255,209,102,.42);background:rgba(255,209,102,.07);color:var(--gold)}
+.status-chip.red{border-color:rgba(255,59,92,.42);background:rgba(255,59,92,.07);color:var(--red)}
+.status-chip.green{border-color:rgba(61,255,180,.42);background:rgba(61,255,180,.07);color:var(--green)}
 .tutorial-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:16px;align-items:stretch}
-.sim-stage{position:relative;min-height:248px;border:1px solid rgba(0,229,255,.22);border-radius:12px;
+.sim-stage{position:relative;min-height:278px;border:1px solid rgba(0,229,255,.36);border-radius:12px;
   background:
     linear-gradient(rgba(0,229,255,.045) 1px,transparent 1px),
     linear-gradient(90deg,rgba(0,229,255,.045) 1px,transparent 1px),
-    radial-gradient(circle at 50% 45%,rgba(0,229,255,.1),transparent 58%);
+    radial-gradient(circle at 50% 45%,rgba(0,229,255,.13),rgba(3,8,20,.9) 58%);
   background-size:34px 34px,34px 34px,100% 100%;overflow:hidden}
-.sim-stage::after{content:'';position:absolute;inset:14px;border:1px dashed rgba(90,106,143,.28);border-radius:50%;pointer-events:none}
+.sim-stage::after{content:'';position:absolute;inset:14px;border:1px dashed rgba(174,189,224,.34);border-radius:50%;pointer-events:none}
 .sim-link{position:absolute;left:22%;top:44%;width:38%;height:2px;background:linear-gradient(90deg,var(--green),rgba(61,255,180,.15));
   box-shadow:0 0 12px rgba(61,255,180,.55);transform:rotate(-20deg);transform-origin:left center}
 .sim-link.broken{background:linear-gradient(90deg,var(--red),rgba(255,59,92,.12));box-shadow:0 0 14px rgba(255,59,92,.55)}
+.sim-link.off{opacity:.22;filter:grayscale(.4)}
+.sim-status{position:absolute;left:10px;right:10px;top:10px;z-index:3;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .sim-node{position:absolute;width:84px;min-height:72px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
-  border:1px solid var(--cyan);border-radius:12px;background:rgba(5,9,22,.92);color:#c9d8f5;text-align:center;
+  border:1px solid var(--cyan);border-radius:12px;background:rgba(7,12,28,.96);color:#f5f9ff;text-align:center;
   box-shadow:0 0 18px rgba(0,229,255,.22);transition:transform .25s,box-shadow .25s,border-color .25s}
 .sim-node .avatar{font-size:22px;line-height:1}
-.sim-node .name{font-size:10px;font-weight:900;letter-spacing:.08em}
-.sim-node .credit{font:700 13px 'Share Tech Mono',monospace;color:var(--cyan)}
+.sim-node .name{font-size:12px;font-weight:900;letter-spacing:.04em}
+.sim-node .credit{font:700 14px 'Share Tech Mono',monospace;color:var(--cyan)}
 .sim-node.me{left:11%;top:36%;border-color:var(--magenta);box-shadow:0 0 22px rgba(255,46,151,.32)}
 .sim-node.ally{left:48%;top:22%;border-color:var(--green);box-shadow:0 0 18px rgba(61,255,180,.24)}
 .sim-node.rival{right:10%;top:45%;border-color:var(--red);box-shadow:0 0 18px rgba(255,59,92,.22)}
 .sim-node.guard{left:43%;bottom:10%;border-color:var(--cyan)}
 .sim-node.bump{transform:scale(1.08);box-shadow:0 0 28px rgba(255,209,102,.45)}
 .sim-node.hit{transform:scale(.94);border-color:var(--red);box-shadow:0 0 24px rgba(255,59,92,.48)}
-.sim-note{position:absolute;left:12px;right:12px;bottom:10px;color:var(--dim);font-size:11px;text-align:center}
+.sim-node.leader{border-color:var(--gold);box-shadow:0 0 26px rgba(255,209,102,.38)}
+.sim-node.traitor{border-color:var(--red);box-shadow:0 0 28px rgba(255,59,92,.55),inset 0 0 14px rgba(255,59,92,.12)}
+.sim-note{position:absolute;left:12px;right:12px;bottom:10px;color:var(--text);font-size:12.5px;text-align:center;
+  text-shadow:0 1px 8px rgba(0,0,0,.7)}
 .sim-guide{display:flex;flex-direction:column;gap:10px}
 .rule-flow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.rule-chip{border:1px solid rgba(0,229,255,.18);border-radius:9px;padding:8px;background:rgba(0,229,255,.045)}
-.rule-chip b{display:block;color:#fff;font-size:12px;margin-bottom:3px}
-.rule-chip span{display:block;color:var(--dim);font-size:11px;line-height:1.35}
-.tut-explain{min-height:112px;border-left:2px solid var(--magenta);padding:10px 12px;background:rgba(255,46,151,.055);border-radius:0 10px 10px 0}
-.tut-explain h3{font-size:14px;color:#fff;margin-bottom:6px}
-.tut-explain p{font-size:12.5px;color:var(--text);line-height:1.55}
-.tut-log{font:700 12px 'Share Tech Mono','Noto Sans KR',sans-serif;color:var(--gold);min-height:18px}
+.rule-chip{border:1px solid rgba(0,229,255,.28);border-radius:9px;padding:9px;background:rgba(0,229,255,.065)}
+.rule-chip b{display:block;color:#fff;font-size:13px;margin-bottom:3px}
+.rule-chip span{display:block;color:var(--dim);font-size:12.5px;line-height:1.45}
+.rule-chip.active{border-color:rgba(255,209,102,.48);background:rgba(255,209,102,.075);box-shadow:0 0 18px rgba(255,209,102,.11)}
+.tut-explain{min-height:112px;border-left:2px solid var(--magenta);padding:12px 13px;background:rgba(255,46,151,.075);border-radius:0 10px 10px 0}
+.tut-explain h3{font-size:15.5px;color:#fff;margin-bottom:6px}
+.tut-explain p{font-size:14px;color:var(--text);line-height:1.65}
+.tut-rules{margin:8px 0 0;padding-left:17px;color:var(--dim);font-size:12.5px;line-height:1.55}
+.tut-rules li+li{margin-top:4px}
+.tut-log{font:700 13px 'Share Tech Mono','Noto Sans KR',sans-serif;color:var(--gold);min-height:20px}
 .tut-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
-.tut-choice{min-width:0;margin:0;padding:10px 8px;font-size:13px;border-radius:9px}
+.tut-choice{min-width:0;margin:0;padding:11px 9px;font-size:14px;border-radius:9px}
 .tut-choice.sel::after{content:'';position:absolute;left:10px;right:10px;bottom:5px;height:2px;background:currentColor;box-shadow:0 0 10px currentColor}
+.tut-choice:disabled{opacity:.55;cursor:default;filter:saturate(.7)}
+.tut-nav{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px}
+.tut-nav .mini-btn{width:100%;padding:9px 10px}
+.tut-nav .mini-btn:disabled{opacity:.48;cursor:default;box-shadow:none}
 
 .lobby-list{display:grid;grid-template-columns:1fr 1fr;gap:7px;max-height:42vh;overflow-y:auto;margin:14px 0}
 .lobby-p{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;
-  background:rgba(0,229,255,.05);border:1px solid rgba(0,229,255,.14);font-size:14px;
+  background:rgba(0,229,255,.075);border:1px solid rgba(0,229,255,.26);font-size:15px;color:var(--text);
   animation:popIn .3s both}
 @keyframes popIn{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
 .lobby-p .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);flex:none}
 .lobby-p.bot .dot{background:var(--purple);box-shadow:0 0 8px var(--purple)}
-.lobby-p .host-tag{margin-left:auto;font-size:10px;color:var(--gold)}
+.lobby-p .host-tag{margin-left:auto;font-size:11px;color:var(--gold)}
 .code-show{text-align:center;margin:6px 0 2px}
 .code-show .code{font-size:42px;letter-spacing:.3em;color:var(--cyan);
   text-shadow:0 0 20px rgba(0,229,255,.7);cursor:pointer}
-.code-show small{color:var(--dim);display:block;margin-top:2px;font-size:11px}
+.code-show small{color:var(--dim);display:block;margin-top:2px;font-size:12.5px}
 .share-box{display:none;margin:14px 0 4px}
-.share-label{font-size:11px;color:var(--dim);letter-spacing:.08em;margin-bottom:6px}
+.share-label{font-size:12px;color:var(--dim);letter-spacing:.06em;margin-bottom:6px}
 .share-line{display:flex;gap:8px;align-items:center}
-.share-line input{flex:1;margin:0;font-size:12px;letter-spacing:0;text-transform:none}
+.share-line input{flex:1;margin:0;font-size:13px;letter-spacing:0;text-transform:none}
+.lobby-qr{display:none;align-items:center;gap:12px;margin:12px 0 0;padding:12px;
+  border:1px solid rgba(0,229,255,.35);border-radius:10px;background:rgba(2,12,28,.78)}
+.lobby-qr img{width:112px;height:112px;border-radius:8px;border:1px solid rgba(0,229,255,.28);background:#fff;padding:5px;flex:none}
+.lobby-qr-text{flex:1;min-width:0}
+.lobby-qr-text b{display:block;color:#fff;font-size:15px;margin-bottom:5px}
+.lobby-qr-text span{display:block;color:var(--dim);font-size:13px;line-height:1.55}
 .mini-btn{flex:none;padding:10px 12px;border-radius:8px;border:1px solid rgba(0,229,255,.35);
-  color:var(--cyan);background:rgba(0,229,255,.07);font-size:12px;font-weight:700}
+  color:var(--cyan);background:rgba(0,229,255,.09);font-size:13px;font-weight:700}
 .mini-btn:hover{background:rgba(0,229,255,.18);box-shadow:0 0 16px rgba(0,229,255,.22)}
 .host-note{display:none;margin:10px 0 2px;padding:9px 11px;border:1px solid rgba(255,209,102,.36);
-  border-radius:9px;background:rgba(255,209,102,.06);color:var(--gold);font-size:12px;line-height:1.45}
-.settings-box{display:none;margin-top:12px;padding:12px;border:1px solid rgba(0,229,255,.22);border-radius:10px;background:rgba(0,10,25,.36)}
+  border-radius:9px;background:rgba(255,209,102,.08);color:var(--gold);font-size:13px;line-height:1.55}
+.settings-box{display:none;margin-top:12px;padding:12px;border:1px solid rgba(0,229,255,.34);border-radius:10px;background:rgba(2,12,28,.78)}
 .settings-title{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px;
-  font:700 11px 'Share Tech Mono','Noto Sans KR',sans-serif;color:var(--cyan);letter-spacing:.18em}
+  font:700 12px 'Share Tech Mono','Noto Sans KR',sans-serif;color:var(--cyan);letter-spacing:.12em}
 .settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .rule-field{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 8px;border-radius:8px;
-  background:rgba(255,255,255,.035);border:1px solid rgba(120,140,190,.16)}
-.rule-field span{font-size:11px;color:var(--dim)}
-.rule-field input{width:64px;margin:0;padding:7px 8px;border-radius:7px;font-size:13px;text-align:right;letter-spacing:0}
+  background:rgba(255,255,255,.055);border:1px solid rgba(174,189,224,.24)}
+.rule-field span{font-size:12.5px;color:var(--dim)}
+.rule-field input{width:66px;margin:0;padding:7px 8px;border-radius:7px;font-size:14px;text-align:right;letter-spacing:0}
 
 /* ===== 게임 화면 ===== */
 #screen-game{display:none;justify-content:flex-start;align-items:stretch}
@@ -149,10 +176,10 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:98;
 #timebar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--cyan),var(--magenta));
   box-shadow:0 0 12px rgba(0,229,255,.8);transition:width .25s linear}
 #hud-row{display:flex;align-items:center;gap:14px;padding:8px 14px;flex-wrap:wrap;justify-content:center}
-#round-tag{font-size:13px;color:var(--dim);letter-spacing:.2em}
+#round-tag{font-size:14px;color:var(--dim);letter-spacing:.14em}
 #round-tag b{color:#fff}
-#phase-tag{font-size:15px;font-weight:900;letter-spacing:.25em;color:var(--cyan);text-shadow:0 0 12px rgba(0,229,255,.6)}
-#event-chip{font-size:12px;padding:4px 12px;border-radius:99px;border:1px solid var(--gold);color:var(--gold);
+#phase-tag{font-size:16px;font-weight:900;letter-spacing:.18em;color:var(--cyan);text-shadow:0 0 12px rgba(0,229,255,.6)}
+#event-chip{font-size:13px;padding:5px 13px;border-radius:99px;border:1px solid var(--gold);color:var(--gold);
   text-shadow:0 0 8px rgba(255,209,102,.5);background:rgba(255,209,102,.07)}
 
 /* 이벤트 배너 */
@@ -165,38 +192,37 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:98;
 #event-banner .ev-name{font-size:clamp(30px,6vw,54px);font-weight:900;letter-spacing:.1em;color:#fff;
   text-shadow:0 0 24px var(--gold),0 0 70px rgba(255,209,102,.5)}
 #event-banner .ev-desc{margin-top:8px;font-size:clamp(14px,2.5vw,19px);color:var(--gold);letter-spacing:.06em}
-#event-banner .ev-round{font-size:12px;color:var(--dim);letter-spacing:.4em;margin-bottom:10px}
+#event-banner .ev-round{font-size:13px;color:var(--dim);letter-spacing:.28em;margin-bottom:10px}
 
 #rejoin-card{position:absolute;left:10px;top:64px;z-index:22;display:none;align-items:center;gap:8px;
   background:var(--panel);border:1px solid rgba(255,209,102,.34);border-radius:10px;padding:8px 10px;backdrop-filter:blur(6px)}
-#rejoin-card span{font:700 10px 'Share Tech Mono',monospace;color:var(--dim);letter-spacing:.2em}
+#rejoin-card span{font:700 11px 'Share Tech Mono',monospace;color:var(--dim);letter-spacing:.14em}
 #rejoin-card b{font:900 20px 'Share Tech Mono',monospace;color:var(--gold);letter-spacing:.14em;text-shadow:0 0 12px rgba(255,209,102,.5)}
 #host-monitor{position:absolute;left:10px;top:64px;bottom:20px;width:286px;z-index:35;display:none;
-  background:rgba(10,14,30,.88);border:1px solid rgba(255,46,151,.3);border-radius:12px;padding:12px;
+  background:var(--panel);border:1px solid rgba(255,46,151,.42);border-radius:12px;padding:12px;
   overflow-y:auto;backdrop-filter:blur(8px);box-shadow:0 0 28px rgba(255,46,151,.12)}
 .monitor-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
-.monitor-head b{font-size:12px;color:#fff;letter-spacing:.18em}
-.monitor-head span{font-size:11px;color:var(--dim)}
-.monitor-code{display:grid;grid-template-columns:1fr;gap:8px;align-items:center;justify-items:center;margin-bottom:10px;text-align:center}
-.monitor-code>div{width:100%}
+.monitor-head b{font-size:13px;color:#fff;letter-spacing:.12em}
+.monitor-head span{font-size:12px;color:var(--dim)}
+.monitor-code{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;margin-bottom:10px}
 .monitor-code strong{display:block;font:900 34px 'Share Tech Mono',monospace;color:var(--cyan);letter-spacing:.22em;text-shadow:0 0 18px rgba(0,229,255,.6)}
-.qr-img{display:block;width:176px;height:176px;border-radius:8px;border:1px solid rgba(0,229,255,.28);background:#fff;padding:4px;image-rendering:pixelated}
+.qr-img{width:88px;height:88px;border-radius:8px;border:1px solid rgba(0,229,255,.28);background:#fff;padding:4px}
 .monitor-link{display:flex;gap:7px;margin-bottom:10px}
-.monitor-link input{flex:1;min-width:0;padding:8px;border:1px solid rgba(0,229,255,.24);border-radius:7px;background:rgba(0,10,25,.72);color:var(--text);font-size:11px}
+.monitor-link input{flex:1;min-width:0;padding:8px;border:1px solid rgba(0,229,255,.38);border-radius:7px;background:rgba(2,12,28,.88);color:var(--text);font-size:12.5px}
 .monitor-stats{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:10px}
-.monitor-stat{padding:8px;border:1px solid rgba(120,140,190,.18);border-radius:8px;background:rgba(255,255,255,.035)}
-.monitor-stat span{display:block;font-size:10px;color:var(--dim);letter-spacing:.12em}
+.monitor-stat{padding:8px;border:1px solid rgba(174,189,224,.24);border-radius:8px;background:rgba(255,255,255,.055)}
+.monitor-stat span{display:block;font-size:11px;color:var(--dim);letter-spacing:.08em}
 .monitor-stat b{display:block;margin-top:3px;font:900 17px 'Share Tech Mono',monospace;color:var(--cyan)}
 
 /* 리더보드 */
 #board{position:absolute;right:10px;top:64px;bottom:130px;width:212px;z-index:20;
-  background:var(--panel);border:1px solid rgba(0,229,255,.2);border-radius:12px;
+  background:var(--panel);border:1px solid rgba(0,229,255,.34);border-radius:12px;
   padding:10px;overflow-y:auto;backdrop-filter:blur(6px);transition:transform .3s}
-#board h3{font-size:11px;letter-spacing:.3em;color:var(--dim);margin-bottom:8px;text-align:center}
-.b-row{display:flex;align-items:center;gap:6px;padding:4px 7px;border-radius:7px;font-size:12.5px;margin-bottom:2px;transition:background .3s}
-.b-row .rk{width:17px;color:var(--dim);font-size:11px;flex:none}
+#board h3{font-size:12px;letter-spacing:.18em;color:var(--dim);margin-bottom:8px;text-align:center}
+.b-row{display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:7px;font-size:13.5px;margin-bottom:3px;transition:background .3s}
+.b-row .rk{width:18px;color:var(--dim);font-size:12px;flex:none}
 .b-row .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.b-row .cr{font-family:'Share Tech Mono',monospace;color:var(--cyan)}
+.b-row .cr{font-family:'Share Tech Mono',monospace;color:var(--cyan);font-weight:700}
 .b-row.me{background:rgba(255,46,151,.13);border:1px solid rgba(255,46,151,.4)}
 .b-row.winner-zone .rk{color:var(--gold)}
 .cut-line{height:0;border-top:1px dashed var(--gold);margin:5px 0;position:relative}
@@ -206,47 +232,41 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:98;
 
 /* 하단 독 */
 #dock{position:absolute;left:0;right:0;bottom:0;z-index:25;display:flex;flex-direction:column;align-items:center;
-  padding:10px 12px 14px;gap:8px;background:linear-gradient(transparent,rgba(3,5,14,.92) 38%)}
-#dock-hint{font-size:12.5px;color:var(--dim);min-height:17px;text-shadow:0 0 6px rgba(0,0,0,.8)}
+  padding:10px 12px 14px;gap:8px;background:linear-gradient(transparent,rgba(3,5,14,.97) 34%)}
+#dock-hint{font-size:14px;color:var(--text);min-height:19px;text-shadow:0 1px 8px rgba(0,0,0,.9)}
 #dock-hint b{color:var(--cyan)}
 .dock-row{display:flex;gap:9px;flex-wrap:wrap;justify-content:center}
-.act-btn{padding:12px 18px;border-radius:11px;font-size:14.5px;font-weight:700;letter-spacing:.05em;
+.act-btn{padding:12px 18px;border-radius:11px;font-size:15px;font-weight:700;letter-spacing:.03em;
   border:1px solid;min-width:104px;transition:.15s;position:relative}
-.act-btn small{display:block;font-weight:400;font-size:10.5px;opacity:.75;margin-top:3px;letter-spacing:0}
+.act-btn small{display:block;font-weight:500;font-size:11.5px;opacity:.92;margin-top:3px;letter-spacing:0}
 .act-mine{border-color:var(--green);color:var(--green);background:rgba(61,255,180,.07)}
 .act-mine:hover,.act-mine.sel{background:rgba(61,255,180,.22);box-shadow:0 0 20px rgba(61,255,180,.35)}
 .act-wall{border-color:var(--cyan);color:var(--cyan);background:rgba(0,229,255,.07)}
 .act-wall:hover,.act-wall.sel{background:rgba(0,229,255,.22);box-shadow:0 0 20px rgba(0,229,255,.35)}
 .act-hack{border-color:var(--red);color:var(--red);background:rgba(255,59,92,.07)}
 .act-hack:hover,.act-hack.sel{background:rgba(255,59,92,.22);box-shadow:0 0 20px rgba(255,59,92,.35)}
-.act-ambush{border-color:var(--gold);color:var(--gold);background:rgba(255,209,102,.08)}
-.act-ambush:hover,.act-ambush.sel{background:rgba(255,209,102,.22);box-shadow:0 0 20px rgba(255,209,102,.36)}
-.predict-row{padding:5px 8px;border:1px solid rgba(255,209,102,.24);border-radius:10px;background:rgba(9,13,30,.78);backdrop-filter:blur(6px)}
-.predict-btn{padding:8px 11px;border-radius:8px;border:1px solid rgba(255,209,102,.44);color:var(--gold);
-  background:rgba(255,209,102,.07);font-size:12.5px;font-weight:800;transition:.15s}
-.predict-btn:hover,.predict-btn.sel{background:rgba(255,209,102,.2);box-shadow:0 0 16px rgba(255,209,102,.25)}
-.sig-btn{padding:9px 14px;border-radius:9px;font-size:13px;border:1px solid;transition:.15s}
+.sig-btn{padding:10px 15px;border-radius:9px;font-size:14px;border:1px solid;transition:.15s}
 .sig-link{border-color:var(--green);color:var(--green)}
 .sig-link:hover,.sig-link.sel{background:rgba(61,255,180,.18)}
 .sig-warn{border-color:var(--gold);color:var(--gold)}
 .sig-warn:hover,.sig-warn.sel{background:rgba(255,209,102,.18)}
 .sig-break{border-color:var(--red);color:var(--red)}
 .sig-break:hover,.sig-break.sel{background:rgba(255,59,92,.18)}
-.emo-btn{font-size:19px;padding:6px 9px;border-radius:9px;border:1px solid rgba(120,140,190,.3);transition:.12s}
+.emo-btn{font-size:20px;padding:6px 10px;border-radius:9px;border:1px solid rgba(174,189,224,.42);transition:.12s}
 .emo-btn:hover{transform:scale(1.2);border-color:var(--cyan)}
 
 /* 토스트 / 제안 */
 #toasts{position:absolute;left:50%;transform:translateX(-50%);top:70px;z-index:40;display:flex;flex-direction:column;gap:6px;align-items:center;pointer-events:none}
 .toast{background:var(--panel);border:1px solid rgba(0,229,255,.35);padding:8px 18px;border-radius:99px;
-  font-size:13px;animation:toastIn .25s both;backdrop-filter:blur(6px);box-shadow:0 0 18px rgba(0,229,255,.15)}
+  font-size:14px;animation:toastIn .25s both;backdrop-filter:blur(6px);box-shadow:0 0 18px rgba(0,229,255,.15)}
 @keyframes toastIn{from{transform:translateY(-12px);opacity:0}to{transform:none;opacity:1}}
 #proposals{position:absolute;left:10px;top:112px;z-index:40;display:flex;flex-direction:column;gap:8px;max-width:230px}
 .prop{background:var(--panel);border:1px solid var(--green);border-radius:11px;padding:10px 13px;
   animation:popIn .3s both;box-shadow:0 0 22px rgba(61,255,180,.2)}
-.prop p{font-size:13px;margin-bottom:8px}
+.prop p{font-size:14px;margin-bottom:8px}
 .prop p b{color:var(--green)}
 .prop .row{gap:6px}
-.prop button{flex:1;padding:7px;border-radius:7px;font-size:12.5px;font-weight:700;border:1px solid}
+.prop button{flex:1;padding:8px;border-radius:7px;font-size:13.5px;font-weight:700;border:1px solid}
 .prop .ok{border-color:var(--green);color:var(--green)}
 .prop .no{border-color:var(--dim);color:var(--dim)}
 
@@ -254,8 +274,8 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:98;
 #feed{position:absolute;left:10px;bottom:130px;z-index:18;width:min(280px,60vw);max-height:30vh;overflow:hidden;
   display:flex;flex-direction:column-reverse;gap:3px;pointer-events:none;
   mask-image:linear-gradient(to top,#000 70%,transparent)}
-.feed-line{font-size:11.5px;color:rgba(216,230,255,.8);background:rgba(5,8,20,.55);
-  padding:4px 9px;border-radius:6px;border-left:2px solid var(--cyan);animation:toastIn .3s both}
+.feed-line{font-size:12.5px;color:var(--text);background:rgba(5,8,20,.82);
+  padding:5px 10px;border-radius:6px;border-left:2px solid var(--cyan);animation:toastIn .3s both}
 .feed-line.bad{border-left-color:var(--red)}
 .feed-line.good{border-left-color:var(--green)}
 .feed-line.warn{border-left-color:var(--gold)}
@@ -272,19 +292,28 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:98;
 .win-row .nm{font-weight:900;font-size:17px;flex:1}
 .win-row .cr{font-family:'Share Tech Mono',monospace;color:var(--gold)}
 .win-row.me-win{border-color:var(--magenta);box-shadow:0 0 30px rgba(255,46,151,.3)}
-#over-sub{color:var(--dim);font-size:13px;margin-bottom:18px}
+#over-sub{color:var(--dim);font-size:14px;margin-bottom:18px}
 
 /* 흔들림 */
 .shake{animation:shake .45s}
 @keyframes shake{0%,100%{transform:none}20%{transform:translate(-7px,4px)}40%{transform:translate(6px,-5px)}60%{transform:translate(-5px,-3px)}80%{transform:translate(4px,3px)}}
 
 @media(max-width:760px){
-  #screen-home{justify-content:flex-start;padding:20px 12px}
-  .subtitle{margin-bottom:18px}
+  #screen-home{padding:16px 12px 28px}
+  .title{font-size:clamp(30px,10vw,42px)}
+  .subtitle{margin:8px 0 14px;font-size:12.5px;letter-spacing:.18em}
   .home-grid{grid-template-columns:1fr;width:min(440px,96vw)}
-  .tutorial-panel{padding:18px}
+  .tutorial-panel{order:-1;padding:16px}
+  .card{padding:18px;width:100%}
   .tutorial-grid{grid-template-columns:1fr}
-  .sim-stage{min-height:226px}
+  .sim-stage{min-height:218px}
+  .sim-guide{display:grid;grid-template-columns:1fr;gap:9px}
+  .tut-actions{order:1;margin-top:0}
+  .tut-nav{order:2}
+  .tut-log{order:3}
+  .tut-explain{order:4;min-height:auto}
+  .rule-flow{order:5}
+  .tut-rules{max-height:82px;overflow-y:auto}
   .rule-flow{grid-template-columns:1fr 1fr}
   .settings-grid{grid-template-columns:1fr}
   #host-monitor{right:10px;width:auto;bottom:130px}
@@ -292,7 +321,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:98;
   #board{display:none}
   #board.open{display:block;transform:none;left:auto}
   #board-toggle{display:block}
-  .act-btn{min-width:88px;padding:10px 12px;font-size:13px}
+  .act-btn{min-width:88px;padding:10px 12px;font-size:14px}
   #feed{bottom:150px;max-height:22vh}
 }
 @media(max-width:420px){
@@ -301,6 +330,8 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:98;
   .tutorial-head{flex-direction:column}
   .rule-flow,.tut-actions{grid-template-columns:1fr}
   .sim-node{width:76px}
+  .lobby-qr{flex-direction:column;text-align:center}
+  .lobby-qr img{width:132px;height:132px}
 }
 </style>
 </head>
@@ -318,7 +349,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:98;
         <input id="in-code" maxlength="4" placeholder="방 코드" style="text-transform:uppercase;flex:1;margin:10px 0 0">
         <button class="btn btn-mag orb" id="bt-join" style="flex:1">접속</button>
       </div>
-      <p style="margin-top:16px;font-size:11.5px;color:var(--dim);line-height:1.7">
+      <p style="margin-top:16px;font-size:13px;color:var(--dim);line-height:1.7">
         4~20명 · 7라운드 · 약 10분<br>
         <span style="color:var(--green)">⛏ 채굴</span>은 <span style="color:var(--cyan)">🛡 방화벽</span>보다 벌고,
         <span style="color:var(--red)">⚡ 해킹</span>은 채굴자를 털고, 방화벽은 해커를 반격합니다.<br>
@@ -330,13 +361,23 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:98;
       <div class="tutorial-head">
         <div>
           <div class="eyebrow">TRAINING SIM</div>
-          <h2 class="orb">1턴 예시 시뮬레이션</h2>
-          <p>아래 행동을 눌러 점수가 어떻게 움직이는지 먼저 확인하세요.</p>
+          <h2 class="orb" id="tut-heading">3라운드 압축 시뮬레이션</h2>
+          <p id="tut-subtitle">이벤트, 신호, 선택, 정산, 생존까지 실제 흐름대로 먼저 익혀보세요.</p>
         </div>
-        <div class="tut-badge">START 100C</div>
+        <div class="tut-badge" id="tut-badge">ROUND 1 · EVENT</div>
+      </div>
+      <div class="tut-meta" aria-live="polite">
+        <span class="phase-pill" id="tut-phase">EVENT</span>
+        <span class="status-chip green" id="tut-trust" data-tutorial-status="trust">TRUST 0</span>
+        <span class="status-chip gold" id="tut-bounty" data-tutorial-status="bounty">BOUNTY 0C</span>
+        <span class="status-chip red" id="tut-traitor" data-tutorial-status="traitor">MARK 없음</span>
       </div>
       <div class="tutorial-grid">
         <div class="sim-stage" id="tut-stage">
+          <div class="sim-status">
+            <span class="status-chip" id="tut-event" data-tutorial-status="event">EVENT 대기</span>
+            <span class="status-chip gold" id="tut-rank" data-tutorial-status="rank">RANK 훈련중</span>
+          </div>
           <div class="sim-link" id="tut-link"></div>
           <div class="sim-node me" id="tut-me"><span class="avatar">🦊</span><span class="name">YOU</span><span class="credit">100C</span></div>
           <div class="sim-node ally" id="tut-ally"><span class="avatar">🤝</span><span class="name">ALLY</span><span class="credit">100C</span></div>
@@ -346,23 +387,29 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:98;
         </div>
         <div class="sim-guide">
           <div class="rule-flow">
-            <div class="rule-chip"><b>1. 신호</b><span>동맹을 제안하거나 경고를 보냅니다.</span></div>
-            <div class="rule-chip"><b>2. 행동</b><span>채굴, 방화벽, 해킹 중 하나를 고릅니다.</span></div>
-            <div class="rule-chip"><b>3. 정산</b><span>선택이 동시에 공개되고 크레딧이 바뀝니다.</span></div>
-            <div class="rule-chip"><b>4. 생존</b><span>7라운드 뒤 상위 20%만 살아남습니다.</span></div>
+            <div class="rule-chip" data-tutorial-phase="event"><b>1. 이벤트</b><span>라운드마다 보상과 위험이 달라집니다.</span></div>
+            <div class="rule-chip" data-tutorial-phase="signal"><b>2. 신호</b><span>동맹 제안, 경고, 이모지로 의도를 읽습니다.</span></div>
+            <div class="rule-chip" data-tutorial-phase="choice"><b>3. 선택</b><span>채굴, 방화벽, 해킹, 배신 중 하나를 고릅니다.</span></div>
+            <div class="rule-chip" data-tutorial-phase="settlement"><b>4. 정산</b><span>동시에 공개되고 크레딧과 표식이 바뀝니다.</span></div>
           </div>
           <div class="tut-explain">
-            <h3 id="tut-title">채굴 예시</h3>
-            <p id="tut-body">당신과 동맹이 같이 채굴하면 기본 30C에 동맹 보너스 15C가 붙습니다. 안전한 판에서는 가장 꾸준한 선택입니다.</p>
+            <h3 id="tut-title">라운드 1 · 데이터 러시</h3>
+            <p id="tut-body">채굴 보상이 커지는 이벤트가 공개됩니다. 이번 판은 협력 채굴을 배우기 좋습니다.</p>
+            <ul class="tut-rules" id="tut-rules"></ul>
           </div>
-          <div class="tut-log" id="tut-log">YOU +45C · ALLY +45C</div>
+          <div class="tut-log" id="tut-log">EVENT · 기본 설정 예시로 시작합니다.</div>
         </div>
       </div>
       <div class="tut-actions">
-        <button class="act-btn act-mine tut-choice sel" data-tutorial="mine">⛏ 채굴<small>동맹 보너스</small></button>
-        <button class="act-btn act-wall tut-choice" data-tutorial="wall">🛡 방화벽<small>해킹 반격</small></button>
-        <button class="act-btn act-hack tut-choice" data-tutorial="hack">⚡ 해킹<small>채굴자 탈취</small></button>
-        <button class="act-btn act-hack tut-choice" data-tutorial="betray">💔 배신<small>동맹 해킹</small></button>
+        <button class="act-btn act-mine tut-choice" data-tutorial-action="mine">⛏ 채굴<small>동맹 보너스</small></button>
+        <button class="act-btn act-wall tut-choice" data-tutorial-action="wall">🛡 방화벽<small>해킹 반격</small></button>
+        <button class="act-btn act-hack tut-choice" data-tutorial-action="hack">⚡ 해킹<small>채굴자 탈취</small></button>
+        <button class="act-btn act-hack tut-choice" data-tutorial-action="betray">💔 배신<small>동맹 해킹</small></button>
+      </div>
+      <div class="tut-nav">
+        <button class="mini-btn" id="tut-prev" data-tutorial-control="prev">이전</button>
+        <button class="mini-btn" id="tut-restart" data-tutorial-control="restart">처음</button>
+        <button class="mini-btn" id="tut-next" data-tutorial-control="next">다음</button>
       </div>
     </section>
   </div>
@@ -381,6 +428,13 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:98;
       <div class="share-line">
         <input id="lobby-link" readonly value="">
         <button class="mini-btn" id="bt-copy-link">링크 복사</button>
+      </div>
+      <div class="lobby-qr" id="lobby-qr">
+        <img id="lobby-qr-img" alt="학생 입장 QR">
+        <div class="lobby-qr-text">
+          <b>학생 입장 QR</b>
+          <span>학생은 카메라로 스캔한 뒤 이름만 입력하면 바로 이 방에 접속합니다.</span>
+        </div>
       </div>
     </div>
     <div class="host-note" id="host-note">방장은 게임에 참여하지 않고 진행 상황만 봅니다. 아래 학생 수만 참가 인원으로 계산됩니다.</div>
@@ -403,7 +457,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:98;
       <button class="btn btn-ghost" id="bt-rmbot">- 봇 제거</button>
     </div>
     <button class="btn btn-cyan orb" id="bt-start" disabled>침투 개시</button>
-    <p id="lobby-hint" style="margin-top:10px;text-align:center;font-size:12px;color:var(--dim)"></p>
+    <p id="lobby-hint" style="margin-top:10px;text-align:center;font-size:13px;color:var(--dim);line-height:1.55"></p>
   </div>
 </div>
 
@@ -468,13 +522,6 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:98;
       <button class="act-btn act-mine" data-act="mine">⛏ 채굴<small>+30 · 동맹 합동 +15/명</small></button>
       <button class="act-btn act-wall" data-act="wall">🛡 방화벽<small>+10 · 해커 반격 +30</small></button>
       <button class="act-btn act-hack" data-act="hack">⚡ 해킹<small>대상 선택 → 40 탈취</small></button>
-      <button class="act-btn act-ambush" data-act="ambush" style="display:none">🎯 매복<small>마지막 2R · 예측 탈취</small></button>
-    </div>
-    <div class="dock-row predict-row" id="ambush-predict" style="display:none">
-      <button class="predict-btn" data-predict="mine">⛏ 채굴</button>
-      <button class="predict-btn" data-predict="wall">🛡 방화벽</button>
-      <button class="predict-btn" data-predict="hack">⚡ 해킹</button>
-      <button class="predict-btn" data-predict="ambush">🎯 매복</button>
     </div>
     <div class="dock-row" id="dock-signals" style="display:none">
       <button class="sig-btn sig-link" data-sig="propose">🤝 동맹 제안</button>
@@ -504,9 +551,14 @@ let players=new Map(), order=[], links=new Set();
 let phase='lobby', phaseEnds=0, phaseDur=1, round=1, rounds=7;
 let curEvent={name:'표준 프로토콜'}, bounty=null, winnersN=4;
 let linkAges={}, bountyPot=0, jackpotTo=null;
-let selected=null, selMode=null, myAction=null, myTarget=null, myPredict=null, pendingAmbushTarget=null;
+let selected=null, selMode=null, myAction=null, myTarget=null;
 let roomSettings={}, maxPlayers=20, minPlayers=4;
 const $=id=>document.getElementById(id);
+function on(el,type,handler){
+  if(!el)return;
+  if(typeof el.addEventListener==='function')el.addEventListener(type,handler);
+  else el['on'+type]=handler;
+}
 const linkKey=(a,b)=>[a,b].sort().join('|');
 const cleanCode=v=>String(v||'').toUpperCase().replace(/[^A-Z2-9]/g,'').slice(0,4);
 const isHost=()=>myRole==='host';
@@ -542,11 +594,13 @@ function fallbackCopy(txt,label){
 function updateInviteViews(code=roomCode){
   if(!code)return;
   const link=roomLink(code);
+  const qr='https://api.qrserver.com/v1/create-qr-code/?size=176x176&margin=8&data='+encodeURIComponent(link);
   if($('lobby-link'))$('lobby-link').value=link;
   if($('game-link'))$('game-link').value=link;
   if($('game-code'))$('game-code').textContent=code;
   if($('monitor-code'))$('monitor-code').textContent=code;
-  if($('qr-img'))$('qr-img').src='https://api.qrserver.com/v1/create-qr-code/?size=352x352&margin=8&data='+encodeURIComponent(link);
+  if($('lobby-qr-img'))$('lobby-qr-img').src=qr;
+  if($('qr-img'))$('qr-img').src=qr;
 }
 
 function applySettings(settings={}){
@@ -581,7 +635,9 @@ function beep(f=440,d=.08,type='square',g=.04){
 /* ================= WebSocket ================= */
 function connect(then){
   if(ws&&ws.readyState===1){then();return}
-  ws=new WebSocket((location.protocol==='https:'?'wss://':'ws://')+location.host);
+  const WS=typeof WebSocket==='function'?WebSocket:(typeof window.WebSocket==='function'?window.WebSocket:null);
+  if(!WS){toast('이 브라우저는 실시간 연결을 지원하지 않습니다');return}
+  ws=new WS((location.protocol==='https:'?'wss://':'ws://')+location.host);
   ws.onopen=then;
   ws.onmessage=e=>handle(JSON.parse(e.data));
   ws.onclose=()=>{toast('서버 연결이 끊어졌습니다');};
@@ -625,7 +681,7 @@ $('bt-create').onclick=()=>{const n=$('in-name').value.trim();if(!n){toast('핸�
 $('bt-join').onclick=()=>{const n=$('in-name').value.trim(),c=$('in-code').value.trim().toUpperCase();
   if(!n){toast('핸들을 입력하세요');return} if(c.length!==4){toast('4자리 방 코드를 입력하세요');return}
   connect(()=>send({t:'join',code:c,name:n,token:storedPlayerToken(c)}))};
-$('in-code').addEventListener('input',e=>e.target.value=cleanCode(e.target.value));
+on($('in-code'),'input',e=>e.target.value=cleanCode(e.target.value));
 $('lobby-code').onclick=()=>copyText(roomCode,'코드 복사됨!');
 $('bt-copy-link').onclick=()=>copyText(roomLink(),'학생 링크 복사됨!');
 $('lobby-link').onclick=()=>{$('lobby-link').select();copyText($('lobby-link').value,'학생 링크 복사됨!')};
@@ -644,72 +700,230 @@ if(invitedCode){
   if(savedHost)connect(()=>send({t:'rejoinHost',code:invitedCode,hostToken:savedHost}));
 }
 document.querySelectorAll('[data-rule]').forEach(input=>{
-  input.addEventListener('change',()=>{
+  on(input,'change',()=>{
     if(!isHost())return;
     const key=input.dataset.rule;
     send({t:'settings',patch:{[key]:Number(input.value)}});
   });
 });
 
-const tutorialCases={
-  mine:{
-    title:'채굴 예시',
-    body:'당신과 동맹이 같이 채굴하면 기본 30C에 동맹 보너스 15C가 붙습니다. 안전한 판에서는 가장 꾸준한 선택입니다.',
-    log:'YOU +45C · ALLY +45C',
-    note:'동맹과 같은 라운드에 채굴하면 서로 수익이 커집니다.',
-    scores:{me:145,ally:145,rival:110,guard:110},
-    bump:['me','ally'],hit:[],broken:false,
+const tutorialActionCopy={
+  mine:{label:'⛏ 채굴',hint:'협력 수익'},
+  wall:{label:'🛡 방화벽',hint:'해킹 반격'},
+  hack:{label:'⚡ 해킹',hint:'타깃 탈취'},
+  betray:{label:'💔 배신',hint:'동맹 해킹'},
+};
+const tutorialPhaseCopy={event:'EVENT',signal:'SIGNAL',choice:'CHOICE',settlement:'SETTLE',final:'FINAL'};
+const tutorialScoreBranches={
+  r1:{
+    mine:{me:145,ally:145,rival:110,guard:110},
+    wall:{me:140,ally:130,rival:70,guard:110},
+    hack:{me:140,ally:130,rival:60,guard:110},
   },
-  wall:{
-    title:'방화벽 예시',
-    body:'라이벌이 당신을 해킹했는데 방화벽을 켜 두면, 기본 10C에 반격 30C가 더해집니다. 공격받을 것 같을 때 강합니다.',
-    log:'YOU +40C · RIVAL -30C',
-    note:'방화벽은 덜 벌지만 해커를 역으로 털 수 있습니다.',
-    scores:{me:140,ally:130,rival:70,guard:100},
-    bump:['me'],hit:['rival'],broken:false,
+  r2:{
+    mine:{me:205,ally:205,rival:150,guard:130},
+    wall:{me:185,ally:165,rival:125,guard:150},
+    hack:{me:215,ally:145,rival:100,guard:130},
   },
-  hack:{
-    title:'해킹 예시',
-    body:'상대가 채굴 중이면 해킹으로 40C를 빼앗습니다. 선두를 해킹하면 현상금이 붙는 라운드도 있습니다.',
-    log:'YOU +40C · RIVAL -40C',
-    note:'해킹은 빠르게 따라잡지만 방화벽을 만나면 손해를 봅니다.',
-    scores:{me:140,ally:130,rival:60,guard:110},
-    bump:['me'],hit:['rival'],broken:false,
-  },
-  betray:{
-    title:'배신 예시',
-    body:'동맹을 해킹하면 60C를 빼앗고 동맹선이 끊어집니다. 대신 다음 라운드에 배신자 낙인이 찍혀 표적이 되기 쉽습니다.',
-    log:'YOU +60C · ALLY -60C · 배신자 낙인',
-    note:'배신은 크게 벌 수 있지만 이후 협상과 생존이 어려워집니다.',
-    scores:{me:160,ally:40,rival:110,guard:110},
-    bump:['me'],hit:['ally'],broken:true,
+  r3:{
+    mine:{me:255,ally:255,rival:190,guard:160},
+    wall:{me:230,ally:205,rival:175,guard:190},
+    hack:{me:265,ally:180,rival:130,guard:160},
+    betray:{me:320,ally:145,rival:180,guard:160},
   },
 };
-let tutorialChoice='mine';
+const tutorialSteps=[
+  {id:'r1-event',round:1,phase:'event',title:'라운드 1 · 데이터 러시',body:'채굴 보상이 커지는 이벤트가 공개됩니다. 이번 판은 협력 채굴을 배우기 좋습니다.',
+    rules:['이벤트는 매 라운드의 유리한 행동을 바꿉니다.','여기서는 기본 설정 예시로 100C에서 시작합니다.'],
+    log:'EVENT · 데이터 러시: 채굴 수익이 커집니다.',note:'라운드가 시작되면 먼저 이벤트가 공개됩니다.',
+    ruleTags:['event','mining'],scores:{me:100,ally:100,rival:100,guard:100},stage:{event:'데이터 러시',trust:0,bounty:0,traitor:false,rank:'훈련 시작',link:'off'}},
+  {id:'r1-signal',round:1,phase:'signal',title:'신호 · 동맹 제안',body:'동맹이 협력 채굴을 제안합니다. 실제 게임에서는 자유 채팅 없이 제안, 경고, 이모지 신호로 의도를 읽습니다.',
+    rules:['동맹은 신호 단계에서 제안하고 수락합니다.','동맹을 유지하면 다음 라운드부터 신뢰 스택이 쌓입니다.'],
+    log:'SIGNAL · ALLY가 동맹을 제안했습니다.',note:'초록 동맹선은 협력 관계를 뜻합니다.',
+    ruleTags:['signal','alliance','trust'],scores:{me:100,ally:100,rival:100,guard:100},stage:{event:'데이터 러시',trust:1,bounty:0,traitor:false,rank:'동맹 형성',link:'on'}},
+  {id:'r1-choice',round:1,phase:'choice',choiceKey:'r1',title:'선택 · 첫 행동 결정',body:'채굴은 꾸준히 벌고, 방화벽은 해킹을 반격하며, 해킹은 채굴자를 털 수 있습니다. 하나를 골라 정산을 확인하세요.',
+    rules:['선택은 동시에 공개됩니다.','다음 버튼은 행동을 고른 뒤 열립니다.'],
+    log:'CHOICE · 첫 행동을 선택하세요.',note:'채굴, 방화벽, 해킹은 서로 다른 위험과 보상을 가집니다.',
+    ruleTags:['choice','mining','firewall','hacking'],actions:['mine','wall','hack'],scores:{me:100,ally:100,rival:100,guard:100},stage:{event:'데이터 러시',trust:1,bounty:0,traitor:false,rank:'선택 대기',link:'on'}},
+  {id:'r1-settle',round:1,phase:'settlement',choiceKey:'r1',defaultAction:'mine',
+    ruleTags:['settlement','mining','firewall','hacking','trust'],stage:{event:'데이터 러시',trust:1,bounty:0,traitor:false,rank:'정산 완료',link:'on'},
+    branches:{
+      mine:{title:'정산 · 협력 채굴',body:'당신과 동맹이 함께 채굴해 기본 수익에 동맹 보너스가 붙습니다. 신뢰도 다음 라운드에 이어집니다.',
+        rules:['채굴은 안정적인 수익원입니다.','동맹과 같이 채굴하면 보너스가 붙습니다.'],log:'SETTLE · YOU +45C · ALLY +45C · TRUST 유지',note:'협력은 느리지만 튼튼한 성장 경로입니다.',scores:tutorialScoreBranches.r1.mine,bump:['me','ally'],hit:[]},
+      wall:{title:'정산 · 방화벽 반격',body:'라이벌이 당신을 노렸지만 방화벽이 반격합니다. 수익은 작아도 공격받을 때 강합니다.',
+        rules:['방화벽은 기본 수익이 낮습니다.','나를 해킹한 해커에게 반격 피해를 줍니다.'],log:'SETTLE · YOU +40C · RIVAL -30C',note:'위협을 예상했다면 방어가 최고의 공격이 됩니다.',scores:tutorialScoreBranches.r1.wall,bump:['me'],hit:['rival']},
+      hack:{title:'정산 · 채굴자 해킹',body:'채굴 중인 라이벌에게서 크레딧을 빼앗습니다. 하지만 상대가 방화벽이면 역으로 당합니다.',
+        rules:['해킹은 빠르게 따라잡는 선택입니다.','방화벽을 만나면 손해를 볼 수 있습니다.'],log:'SETTLE · YOU +40C · RIVAL -40C',note:'해킹은 강하지만 읽히면 위험합니다.',scores:tutorialScoreBranches.r1.hack,bump:['me'],hit:['rival']},
+    }},
+  {id:'r2-event',round:2,phase:'event',scoreChoice:'r1',defaultAction:'mine',title:'라운드 2 · 현상금 공개',body:'현재 앞선 플레이어가 공개 타깃이 됩니다. 해킹당하지 않고 버티면 현상금 팟이 커집니다.',
+    rules:['선두는 모두가 볼 수 있는 표적이 됩니다.','현상금을 노릴지, 동맹을 지킬지 판단해야 합니다.'],
+    log:'EVENT · 현상금 팟 40C가 열렸습니다.',note:'금색 테두리는 현재 주목받는 선두를 뜻합니다.',
+    ruleTags:['event','bounty'],stage:{event:'현상금',trust:2,bounty:40,traitor:false,rank:'YOU 표적',link:'on'},leader:['me']},
+  {id:'r2-signal',round:2,phase:'signal',scoreChoice:'r1',defaultAction:'mine',title:'신호 · 경고와 눈치싸움',body:'동맹은 협력을 원하지만 라이벌은 현상금을 노립니다. 신호 단계에서는 말보다 행동 예고를 읽어야 합니다.',
+    rules:['경고 신호는 공격을 예고하거나 속일 수 있습니다.','신뢰 스택은 오래 유지한 동맹일수록 커집니다.'],
+    log:'SIGNAL · ALLY는 협력, RIVAL은 표적 경고를 보냅니다.',note:'신호는 약속일 수도, 속임수일 수도 있습니다.',
+    ruleTags:['signal','trust','bounty'],stage:{event:'현상금',trust:2,bounty:40,traitor:false,rank:'경고 수신',link:'on'},leader:['me']},
+  {id:'r2-choice',round:2,phase:'choice',choiceKey:'r2',scoreChoice:'r1',defaultAction:'mine',title:'선택 · 현상금 압박',body:'협력 채굴로 신뢰를 키울 수도, 방화벽으로 표적 상태를 버틸 수도, 해킹으로 현상금을 노릴 수도 있습니다.',
+    rules:['신뢰 스택은 합동 채굴 보너스를 키웁니다.','현상금은 선두를 흔드는 역전 장치입니다.'],
+    log:'CHOICE · 협력, 방어, 추격 중 하나를 고르세요.',note:'이번 선택은 신뢰와 현상금 흐름을 함께 바꿉니다.',
+    ruleTags:['choice','trust','bounty'],actions:['mine','wall','hack'],actionText:{mine:{label:'⛏ 협력',hint:'신뢰 성장'},wall:{label:'🛡 방어',hint:'표적 버티기'},hack:{label:'⚡ 추격',hint:'현상금 노림'}},stage:{event:'현상금',trust:2,bounty:40,traitor:false,rank:'선택 대기',link:'on'},leader:['me']},
+  {id:'r2-settle',round:2,phase:'settlement',choiceKey:'r2',defaultAction:'mine',ruleTags:['settlement','trust','bounty'],
+    stage:{event:'현상금',trust:2,bounty:40,traitor:false,rank:'정산 완료',link:'on'},
+    branches:{
+      mine:{title:'정산 · 신뢰 스택 성장',body:'동맹과 협력을 이어가 신뢰가 더 쌓입니다. 다음 배신 유혹도 커지지만 합동 채굴 보너스도 커집니다.',
+        rules:['동맹 유지 라운드가 길수록 신뢰 보너스가 커집니다.','오래된 동맹일수록 협력도 배신도 더 강해집니다.'],log:'SETTLE · YOU +60C · ALLY +60C · TRUST 3',note:'신뢰가 쌓이면 초록 동맹선이 더 의미 있어집니다.',scores:tutorialScoreBranches.r2.mine,stage:{trust:3,bounty:50},bump:['me','ally'],hit:[]},
+      wall:{title:'정산 · 표적 방어',body:'방화벽으로 추격자를 막아 현상금 사냥을 피합니다. 크게 벌지는 못했지만 생존권을 지킵니다.',
+        rules:['선두일 때 방화벽은 현상금 방어 수단이 됩니다.','공격을 버티면 현상금 팟은 더 커질 수 있습니다.'],log:'SETTLE · 방화벽 반격 · BOUNTY 50C로 증가',note:'버티는 것도 전략입니다.',scores:tutorialScoreBranches.r2.wall,stage:{trust:2,bounty:50},bump:['me','guard'],hit:['rival']},
+      hack:{title:'정산 · 현상금 추격',body:'해킹으로 라이벌을 흔들고 현상금을 가져옵니다. 하지만 동맹 협력은 약해집니다.',
+        rules:['현상금은 역전 기회를 만듭니다.','공격에 집중하면 동맹 신뢰 성장이 느려집니다.'],log:'SETTLE · YOU +70C · BOUNTY 획득',note:'큰 보상은 다음 라운드의 표적도 함께 부릅니다.',scores:tutorialScoreBranches.r2.hack,stage:{trust:1,bounty:0},bump:['me'],hit:['rival']},
+    }},
+  {id:'r3-event',round:3,phase:'event',scoreChoice:'r2',defaultAction:'mine',title:'라운드 3 · 대숙청',body:'마지막 압박 이벤트입니다. 배신 보상이 커지고, 살아남을 순위 계산이 가까워집니다.',
+    rules:['이벤트는 평소의 정답을 뒤집을 수 있습니다.','마지막에는 점수뿐 아니라 표식과 표적 상태도 중요합니다.'],
+    log:'EVENT · 대숙청: 배신 유혹이 커집니다.',note:'붉은 압박은 배신과 역전 위험을 뜻합니다.',
+    ruleTags:['event','betrayal'],stage:{event:'대숙청',trust:3,bounty:60,traitor:false,rank:'최종 압박',link:'on'},leader:['me']},
+  {id:'r3-signal',round:3,phase:'signal',scoreChoice:'r2',defaultAction:'mine',title:'신호 · 믿을지 끊을지',body:'동맹 신뢰는 높지만 배신 보상도 커졌습니다. 상대의 신호가 진짜 협력인지 마지막 속임수인지 판단해야 합니다.',
+    rules:['신뢰가 높을수록 협력 보너스가 커집니다.','동맹을 해킹하면 큰 보상이 있지만 낙인이 남습니다.'],
+    log:'SIGNAL · ALLY는 협력을 요청합니다. RIVAL은 경고를 보냅니다.',note:'신뢰가 높은 순간일수록 배신의 유혹도 커집니다.',
+    ruleTags:['signal','trust','betrayal'],stage:{event:'대숙청',trust:3,bounty:60,traitor:false,rank:'최종 신호',link:'on'},leader:['me']},
+  {id:'r3-choice',round:3,phase:'choice',choiceKey:'r3',scoreChoice:'r2',defaultAction:'mine',title:'선택 · 최종 행동',body:'협력을 유지하거나, 방화벽으로 버티거나, 해킹으로 순위를 흔들거나, 동맹을 배신할 수 있습니다.',
+    rules:['배신은 큰 탈취를 주지만 다음 표적이 됩니다.','최종 생존은 상위권 순위로 결정됩니다.'],
+    log:'CHOICE · 마지막 행동을 고르세요.',note:'이번 선택 뒤에는 최종 순위가 공개됩니다.',
+    ruleTags:['choice','betrayal','survival'],actions:['mine','wall','hack','betray'],actionText:{mine:{label:'⛏ 협력 유지',hint:'안정 생존'},wall:{label:'🛡 방화벽',hint:'표적 방어'},hack:{label:'⚡ 해킹',hint:'순위 흔들기'},betray:{label:'💔 배신',hint:'큰 탈취'}},stage:{event:'대숙청',trust:3,bounty:60,traitor:false,rank:'최종 선택',link:'on'},leader:['me']},
+  {id:'r3-settle',round:3,phase:'settlement',choiceKey:'r3',defaultAction:'mine',ruleTags:['settlement','betrayal','traitor-mark','survival'],
+    stage:{event:'대숙청',trust:3,bounty:60,traitor:false,rank:'정산 완료',link:'on'},
+    branches:{
+      mine:{title:'정산 · 협력 생존',body:'동맹을 지켜 둘 다 상위권을 유지합니다. 큰 폭발은 없지만 낙인 없이 안정적으로 끝냅니다.',
+        rules:['협력은 신뢰 보너스를 끝까지 활용합니다.','낙인이 없으면 다음 표적 부담이 줄어듭니다.'],log:'SETTLE · YOU +50C · ALLY +50C · MARK 없음',note:'협력은 끝까지 살아남는 느린 힘입니다.',scores:tutorialScoreBranches.r3.mine,stage:{trust:3,bounty:60,traitor:false,link:'on'},bump:['me','ally'],hit:[]},
+      wall:{title:'정산 · 방어 생존',body:'방화벽으로 마지막 공격을 버팁니다. 점수 상승은 작지만 표적 상태에서 안전합니다.',
+        rules:['방화벽은 마지막 라운드의 보험입니다.','공격받을 때만 최고의 효율을 냅니다.'],log:'SETTLE · 방어 성공 · 생존권 유지',note:'읽히는 순간에도 버티는 선택지가 있습니다.',scores:tutorialScoreBranches.r3.wall,stage:{trust:2,bounty:70,traitor:false,link:'on'},bump:['me'],hit:['rival']},
+      hack:{title:'정산 · 순위 흔들기',body:'해킹으로 경쟁자를 끌어내려 순위를 올립니다. 방화벽을 만나지 않았기 때문에 큰 손해는 피했습니다.',
+        rules:['해킹은 채굴자를 상대로 강합니다.','순위 싸움에서는 공격 타깃 선택이 중요합니다.'],log:'SETTLE · YOU +50C · RIVAL -50C',note:'공격은 순위를 바꾸지만 신뢰를 키우지는 못합니다.',scores:tutorialScoreBranches.r3.hack,stage:{trust:1,bounty:20,traitor:false,link:'on'},bump:['me'],hit:['rival']},
+      betray:{title:'정산 · 동맹 배신',body:'동맹을 해킹해 큰 크레딧을 얻습니다. 대신 배신자 낙인이 찍혀 모두에게 위험한 표적이 됩니다.',
+        rules:['배신은 동맹 해킹 보상을 크게 키웁니다.','배신자 낙인은 이후 모두에게 노출되는 위험 표식입니다.'],log:'SETTLE · YOU +115C · ALLY -110C · TRAITOR MARK',note:'붉은 동맹선은 신뢰가 끊어진 상태입니다.',scores:tutorialScoreBranches.r3.betray,stage:{trust:0,bounty:20,traitor:true,link:'broken'},bump:['me'],hit:['ally'],traitor:['me']},
+    }},
+  {id:'final',round:3,phase:'final',choiceKey:'r3',defaultAction:'mine',ruleTags:['ranking','survival','traitor-mark'],stage:{event:'생존 판정',trust:0,bounty:0,traitor:false,rank:'최종 순위',link:'on'},
+    branches:{
+      mine:{title:'최종 · 협력 생존권',body:'당신과 동맹은 안정적으로 상위권을 지켰습니다. 실제 20명 수업에서는 최종 상위 20%만 생존합니다.',
+        rules:['최종 순위는 누적 크레딧으로 결정됩니다.','협력은 낙인 없이 생존권을 노리기 좋습니다.'],log:'FINAL · YOU 255C · ALLY 255C · 생존권',note:'실제 게임은 7라운드 뒤 상위 20%만 살아남습니다.',scores:tutorialScoreBranches.r3.mine,stage:{traitor:false,rank:'YOU / ALLY 생존권',link:'on'},bump:['me','ally'],hit:[],ranking:['YOU','ALLY','RIVAL','GUARD'],survivors:['YOU','ALLY']},
+      wall:{title:'최종 · 방어 생존권',body:'큰 보상은 아니었지만 마지막 공격을 막아 생존권을 지켰습니다. 위험할 때는 방어도 충분한 선택입니다.',
+        rules:['방어는 점수 폭발보다 손실 방지에 강합니다.','순위권을 지키는 것도 승리 전략입니다.'],log:'FINAL · YOU 230C · 방어로 생존권 유지',note:'공격받을 것 같다면 방화벽이 순위를 지킵니다.',scores:tutorialScoreBranches.r3.wall,stage:{traitor:false,rank:'YOU 생존권',link:'on'},bump:['me'],hit:['rival'],ranking:['YOU','ALLY','GUARD','RIVAL'],survivors:['YOU']},
+      hack:{title:'최종 · 공격 생존권',body:'해킹으로 라이벌을 끌어내리고 생존권에 들어갑니다. 공격은 빠르지만 방화벽 위험을 항상 계산해야 합니다.',
+        rules:['해킹은 순위를 뒤집는 공격 선택입니다.','방화벽을 만날 경우 결과가 반대로 바뀔 수 있습니다.'],log:'FINAL · YOU 265C · RIVAL 130C · 생존권',note:'타깃 선택이 생존과 탈락을 가릅니다.',scores:tutorialScoreBranches.r3.hack,stage:{traitor:false,rank:'YOU 생존권',link:'on'},bump:['me'],hit:['rival'],ranking:['YOU','ALLY','GUARD','RIVAL'],survivors:['YOU']},
+      betray:{title:'최종 · 배신의 대가',body:'점수는 크게 올랐지만 배신자 낙인이 남았습니다. 실제 게임에서는 다음 라운드 표적이 되므로 너무 이른 배신은 위험합니다.',
+        rules:['배신은 한 번에 큰 점수를 줍니다.','낙인은 모두에게 보이는 위험 신호입니다.'],log:'FINAL · YOU 320C · TRAITOR MARK · 생존권이지만 표적',note:'높은 점수와 높은 위험이 함께 옵니다.',scores:tutorialScoreBranches.r3.betray,stage:{traitor:true,rank:'YOU 고위험 생존권',link:'broken'},bump:['me'],hit:['ally'],traitor:['me'],ranking:['YOU','RIVAL','GUARD','ALLY'],survivors:['YOU']},
+    }},
+];
+const tutorialState={index:0,choices:{}};
+let tutorialChoice='';
 
-function setTutorial(kind='mine',sound=false){
-  const t=tutorialCases[kind]||tutorialCases.mine;
-  tutorialChoice=kind;
-  $('tut-title').textContent=t.title;
-  $('tut-body').textContent=t.body;
-  $('tut-log').textContent=t.log;
-  $('tut-note').textContent=t.note;
-  $('tut-link').classList.toggle('broken',!!t.broken);
+function mergeTutorialStep(base,choice){
+  const branch=base.branches&&choice?base.branches[choice]:null;
+  const merged={...base,...(branch||{})};
+  merged.stage={...(base.stage||{}),...((branch&&branch.stage)||{})};
+  if(!merged.scores&&base.scoreChoice){
+    const selected=tutorialState.choices[base.scoreChoice]||base.defaultAction||'mine';
+    merged.scores=tutorialScoreBranches[base.scoreChoice]?.[selected]||{me:100,ally:100,rival:100,guard:100};
+  }
+  merged.scores=merged.scores||base.scores||{me:100,ally:100,rival:100,guard:100};
+  merged.rules=merged.rules||base.rules||[];
+  merged.ruleTags=merged.ruleTags||base.ruleTags||[];
+  return merged;
+}
+function currentTutorialStep(){
+  const base=tutorialSteps[tutorialState.index]||tutorialSteps[0];
+  const choice=base.choiceKey?(tutorialState.choices[base.choiceKey]||base.defaultAction):null;
+  return mergeTutorialStep(base,choice);
+}
+function pruneTutorialChoices(){
+  const cut=tutorialState.index;
+  tutorialSteps.forEach((step,i)=>{
+    if(step.phase==='choice'&&step.choiceKey&&cut<i)delete tutorialState.choices[step.choiceKey];
+  });
+  tutorialChoice=currentTutorialStep().choiceKey?(tutorialState.choices[currentTutorialStep().choiceKey]||''):'';
+}
+function setTutorialRules(rules=[]){
+  const list=$('tut-rules'); if(!list)return;
+  list.innerHTML='';
+  rules.forEach(rule=>{
+    const li=document.createElement('li');
+    li.textContent=rule;
+    list.appendChild(li);
+  });
+}
+function setTutorialActionButton(btn,step){
+  const key=btn.dataset.tutorialAction;
+  const copy=(step.actionText&&step.actionText[key])||tutorialActionCopy[key];
+  btn.innerHTML=(copy?.label||key)+`<small>${copy?.hint||''}</small>`;
+  const enabled=(step.actions||[]).includes(key);
+  btn.disabled=!enabled;
+  btn.classList.toggle('sel',!!step.choiceKey&&tutorialState.choices[step.choiceKey]===key);
+}
+function renderTutorial(){
+  const step=currentTutorialStep();
+  const phaseLabel=tutorialPhaseCopy[step.phase]||step.phase.toUpperCase();
+  $('tut-badge').textContent=`ROUND ${step.round} · ${phaseLabel}`;
+  $('tut-phase').textContent=phaseLabel;
+  $('tut-title').textContent=step.title;
+  $('tut-body').textContent=step.body;
+  $('tut-log').textContent=step.log;
+  $('tut-note').textContent=step.note||'';
+  $('tut-event').textContent='EVENT '+(step.stage.event||'없음');
+  $('tut-trust').textContent='TRUST '+(step.stage.trust||0);
+  $('tut-bounty').textContent='BOUNTY '+(step.stage.bounty||0)+'C';
+  $('tut-traitor').textContent=step.stage.traitor?'MARK 배신자':'MARK 없음';
+  $('tut-rank').textContent='RANK '+(step.stage.rank||'훈련중');
+  setTutorialRules(step.rules);
+  document.querySelectorAll('[data-tutorial-phase]').forEach(chip=>{
+    const phase=step.phase==='final'?'settlement':step.phase;
+    chip.classList.toggle('active',chip.dataset.tutorialPhase===phase);
+  });
+  const link=$('tut-link');
+  link.classList.toggle('broken',step.stage.link==='broken');
+  link.classList.toggle('off',step.stage.link==='off');
   ['me','ally','rival','guard'].forEach(id=>{
     const node=$('tut-'+id);
-    node.querySelector('.credit').textContent=t.scores[id]+'C';
-    node.classList.remove('bump','hit');
-    if(t.bump.includes(id))node.classList.add('bump');
-    if(t.hit.includes(id))node.classList.add('hit');
+    node.querySelector('.credit').textContent=(step.scores[id]??100)+'C';
+    node.classList.remove('bump','hit','leader','traitor');
+    if((step.bump||[]).includes(id))node.classList.add('bump');
+    if((step.hit||[]).includes(id))node.classList.add('hit');
+    if((step.leader||[]).includes(id))node.classList.add('leader');
+    if((step.traitor||[]).includes(id)||(step.stage.traitor&&id==='me'))node.classList.add('traitor');
   });
-  document.querySelectorAll('.tut-choice').forEach(b=>b.classList.toggle('sel',b.dataset.tutorial===kind));
-  if(sound)beep(kind==='betray'?150:kind==='wall'?560:kind==='hack'?300:760,.08,kind==='mine'?'sine':'square',.035);
+  document.querySelectorAll('[data-tutorial-action]').forEach(btn=>setTutorialActionButton(btn,step));
+  const choiceReady=step.phase!=='choice'||!!tutorialState.choices[step.choiceKey];
+  $('tut-prev').disabled=tutorialState.index===0;
+  $('tut-next').disabled=tutorialState.index>=tutorialSteps.length-1||!choiceReady;
+  $('tut-restart').disabled=tutorialState.index===0&&Object.keys(tutorialState.choices).length===0;
+  tutorialChoice=step.choiceKey?(tutorialState.choices[step.choiceKey]||''):'';
 }
-
-document.querySelectorAll('.tut-choice').forEach(b=>{
-  b.onclick=()=>setTutorial(b.dataset.tutorial,true);
+function chooseTutorialAction(action){
+  const step=currentTutorialStep();
+  if(step.phase!=='choice'||!(step.actions||[]).includes(action))return;
+  tutorialState.choices[step.choiceKey]=action;
+  tutorialChoice=action;
+  renderTutorial();
+  beep(action==='betray'?150:action==='wall'?560:action==='hack'?300:760,.08,action==='mine'?'sine':'square',.035);
+}
+function moveTutorial(delta){
+  const step=currentTutorialStep();
+  if(delta>0&&step.phase==='choice'&&!tutorialState.choices[step.choiceKey])return;
+  tutorialState.index=Math.max(0,Math.min(tutorialSteps.length-1,tutorialState.index+delta));
+  pruneTutorialChoices();
+  renderTutorial();
+}
+function restartTutorial(){
+  tutorialState.index=0;
+  tutorialState.choices={};
+  tutorialChoice='';
+  renderTutorial();
+}
+document.querySelectorAll('[data-tutorial-action]').forEach(b=>{
+  b.onclick=()=>chooseTutorialAction(b.dataset.tutorialAction);
 });
-setTutorial();
+$('tut-prev').onclick=()=>moveTutorial(-1);
+$('tut-next').onclick=()=>moveTutorial(1);
+$('tut-restart').onclick=restartTutorial;
+renderTutorial();
 
 function onRoom(m){
   hostId=m.hostId;
@@ -731,6 +945,7 @@ function onRoom(m){
     const host=isHost();
     $('host-tools').style.display=host?'flex':'none';
     $('share-box').style.display=host?'block':'none';
+    if($('lobby-qr'))$('lobby-qr').style.display=host?'flex':'none';
     $('host-note').style.display=host?'block':'none';
     document.querySelectorAll('.host-settings').forEach(x=>x.style.display=host?'block':'none');
     $('bt-start').style.display=host?'block':'none';
@@ -783,19 +998,6 @@ function updateMonitor(){
 
 /* ================= 페이즈 ================= */
 const PHASE_KO={event:'이벤트',signal:'신호 교환',action:'행동 결정',resolve:'정산'};
-const ACTION_KO={mine:'채굴',wall:'방화벽',hack:'해킹',ambush:'매복'};
-const ACTION_ICON={mine:'⛏',wall:'🛡',hack:'⚡',ambush:'🎯'};
-const actionText=act=>`${ACTION_ICON[act]||''} ${ACTION_KO[act]||act||'?'}`.trim();
-const isClimaxRound=()=>round>=rounds-1;
-function hideAmbushPredict(){
-  pendingAmbushTarget=null;
-  $('ambush-predict').style.display='none';
-  document.querySelectorAll('#ambush-predict .predict-btn').forEach(x=>x.classList.remove('sel'));
-}
-function showAmbushPredict(){
-  $('ambush-predict').style.display='flex';
-  document.querySelectorAll('#ambush-predict .predict-btn').forEach(x=>x.classList.remove('sel'));
-}
 function onPhase(m){
   show('screen-game');
   phase=m.phase;phaseEnds=m.ends;phaseDur=m.duration;round=m.round;rounds=m.rounds;
@@ -817,13 +1019,10 @@ function onPhase(m){
   $('rejoin-card').style.display=isHost()?'none':'flex';
   $('dock').style.display=isHost()?'none':'flex';
   $('dock-actions').style.display=!isHost()&&phase==='action'?'flex':'none';
-  const ambushBtn=document.querySelector('#dock-actions [data-act="ambush"]');
-  if(ambushBtn)ambushBtn.style.display=isClimaxRound()?'block':'none';
   $('dock-signals').style.display=!isHost()&&phase==='signal'?'flex':'none';
   $('dock-emojis').style.display=!isHost()&&phase==='signal'?'flex':'none';
   document.querySelectorAll('#dock-actions .act-btn,#dock-signals .sig-btn').forEach(b=>b.classList.remove('sel'));
-  hideAmbushPredict();
-  myAction=null;myTarget=null;myPredict=null;
+  myAction=null;myTarget=null;
   if(phase==='event'){
     $('ev-round').textContent='ROUND '+round+(round===rounds?' - FINAL':'');
     $('ev-name').textContent=curEvent.name;
@@ -844,7 +1043,7 @@ function onPhase(m){
     if(round===rounds){fx.push({type:'flash',col:'255,59,92',t:0});beep(140,.5,'sawtooth',.06)}
   }
   if(phase==='signal'){hint('노드를 클릭해 <b>동맹 제안</b>·<b>경고</b>를 보내거나, 이모지로 의중을 흘리세요');beep(520,.07)}
-  if(phase==='action'){hint(isClimaxRound()?'막판입니다 — 행동을 선택하세요. <b>매복</b>은 대상 행동을 맞히면 크레딧을 빼앗습니다':'이번 라운드 행동을 선택하세요 — <b>마감 전까지 변경 가능</b>');beep(660,.07)}
+  if(phase==='action'){hint('이번 라운드 행동을 선택하세요 — <b>마감 전까지 변경 가능</b>');beep(660,.07)}
   renderBoard();
 }
 function hint(h){$('dock-hint').innerHTML=h}
@@ -924,7 +1123,6 @@ function onLinkBroken(m){
 document.querySelectorAll('#dock-actions .act-btn').forEach(b=>{
   b.onclick=()=>{
     const act=b.dataset.act;
-    hideAmbushPredict();
     if(act==='hack'){
       selMode='hack';
       document.querySelectorAll('#dock-actions .act-btn').forEach(x=>x.classList.remove('sel'));
@@ -932,45 +1130,34 @@ document.querySelectorAll('#dock-actions .act-btn').forEach(b=>{
       hint(`해킹할 <b>노드를 클릭</b>하세요 — 동맹 해킹 시 <b style="color:var(--red)">배신(${roomSettings.betraySteal||60}+신뢰 보너스 탈취 + 낙인)</b>`);
       return;
     }
-    if(act==='ambush'){
-      if(!isClimaxRound()){toast('매복은 마지막 2라운드에 열립니다');return}
-      selMode='ambushTarget';
-      document.querySelectorAll('#dock-actions .act-btn').forEach(x=>x.classList.remove('sel'));
-      b.classList.add('sel');
-      hint('매복할 <b>노드를 클릭</b>하세요');
-      return;
-    }
     selMode=null;
     send({t:'action',act});
   };
 });
-document.querySelectorAll('#ambush-predict .predict-btn').forEach(b=>{
-  b.onclick=()=>{
-    const predict=b.dataset.predict;
-    document.querySelectorAll('#ambush-predict .predict-btn').forEach(x=>x.classList.toggle('sel',x===b));
-    if(!pendingAmbushTarget){toast('먼저 매복 대상을 선택하세요');return}
-    send({t:'action',act:'ambush',target:pendingAmbushTarget,predict});
-    selMode=null;
-    hideAmbushPredict();
-  };
-});
 function onActionOk(m){
-  myAction=m.act;myTarget=m.target;myPredict=m.predict||null;
-  hideAmbushPredict();
+  myAction=m.act;myTarget=m.target;
   document.querySelectorAll('#dock-actions .act-btn').forEach(x=>x.classList.toggle('sel',x.dataset.act===m.act));
   const t=m.target?players.get(m.target):null;
-  const prediction=myPredict?` · 예측 ${actionText(myPredict)}`:'';
-  hint(`✅ <b>${actionText(m.act)}${t?' → '+esc(t.name):''}${prediction}</b> 전송됨 — 마감 전까지 변경 가능`);
+  hint(`✅ <b>${{mine:'⛏ 채굴',wall:'🛡 방화벽',hack:'⚡ 해킹'}[m.act]}${t?' → '+esc(t.name):''}</b> 전송됨 — 마감 전까지 변경 가능`);
   beep(980,.06,'sine',.05);
 }
 
 /* ================= 캔버스 클릭 ================= */
-const cv=$('cv'),ctx=cv.getContext('2d');
+function nullCanvasContext(canvas){
+  const noop=()=>{};
+  const gradient=()=>({addColorStop:noop});
+  return {
+    canvas,clearRect:noop,fillRect:noop,strokeRect:noop,beginPath:noop,moveTo:noop,lineTo:noop,arc:noop,
+    fill:noop,stroke:noop,save:noop,restore:noop,translate:noop,rotate:noop,scale:noop,fillText:noop,strokeText:noop,
+    setLineDash:noop,drawImage:noop,measureText:()=>({width:0}),createLinearGradient:gradient,createRadialGradient:gradient
+  };
+}
+const cv=$('cv'),ctx=(cv&&typeof cv.getContext==='function'&&cv.getContext('2d'))||nullCanvasContext(cv);
 let DPR=1;
-function resize(){DPR=window.devicePixelRatio||1;cv.width=innerWidth*DPR;cv.height=innerHeight*DPR;layout()}
-addEventListener('resize',resize);resize();
+function resize(){if(!cv)return;DPR=window.devicePixelRatio||1;cv.width=innerWidth*DPR;cv.height=innerHeight*DPR;layout()}
+on(window,'resize',resize);resize();
 
-cv.addEventListener('pointerdown',e=>{
+on(cv,'pointerdown',e=>{
   const x=e.clientX,y=e.clientY;
   let best=null,bd=46;
   for(const p of players.values()){
@@ -987,12 +1174,6 @@ cv.addEventListener('pointerdown',e=>{
   } else if(phase==='action'&&selMode==='hack'){
     send({t:'action',act:'hack',target:best.id});
     selMode=null;
-  } else if(phase==='action'&&selMode==='ambushTarget'){
-    pendingAmbushTarget=best.id;
-    selected=best.id;
-    selMode='ambushPredict';
-    showAmbushPredict();
-    hint(`<b>${esc(best.name)}</b>의 행동을 예측하세요`);
   } else {
     selected=best.id===selected?null:best.id;
   }
@@ -1011,16 +1192,12 @@ function onResolve(m){
   $('rejoin-card').style.display=isHost()?'none':'flex';
   $('dock').style.display=isHost()?'none':'flex';
   $('dock-actions').style.display='none';$('dock-signals').style.display='none';$('dock-emojis').style.display='none';
-  hideAmbushPredict();
   hint('정산 중...');
+  const newCredits=new Map(m.players.map(p=>[p.id,p.credits]));
   // 로그 순차 재생
-  const ambushes=m.logs.filter(l=>l.type==='ambush');
   const hacks=m.logs.filter(l=>l.type==='hack'||l.type==='blocked');
-  const rest=m.logs.filter(l=>l.type!=='ambush'&&l.type!=='hack'&&l.type!=='blocked');
+  const rest=m.logs.filter(l=>l.type!=='hack'&&l.type!=='blocked');
   let delay=400;
-  ambushes.forEach(l=>{
-    setTimeout(()=>playLog(l),delay);delay+=620;
-  });
   hacks.forEach(l=>{
     setTimeout(()=>playLog(l),delay);delay+=560;
   });
@@ -1035,32 +1212,7 @@ function onResolve(m){
 }
 function playLog(l){
   const f=players.get(l.from),t=l.to?players.get(l.to):null;
-  if(l.type==='ambush'){
-    if(l.success){
-      if(f&&t)fx.push({type:'bolt',a:l.from,b:l.to,t:0,betrayal:true});
-      if(t){
-        t.disp=Math.max(0,t.disp-l.amount);
-        float(t.x,t.y,'-'+l.amount,'#ff3b5c',true);
-        t.flash={t:0,col:'#ff2e97'};
-      }
-      if(f){
-        f.disp+=l.amount;
-        float(f.x,f.y-22,'+'+l.amount+(l.belowCutoff?' 추격':''),'#ffd166',true);
-        f.flash={t:0,col:'#ffd166'};
-      }
-      feed(`🎯 매복 성공! ${f?f.name:'?'} → ${t?t.name:'?'} ${actionText(l.actual)} 예측 · ${l.amount}C 탈취${l.belowCutoff?' · 생존선 추격':''}`,'warn');
-      beep(760,.12,'triangle',.055);
-    } else {
-      if(f){
-        f.disp=Math.max(0,f.disp-l.penalty);
-        float(f.x,f.y,'-'+l.penalty,'#ff3b5c',true);
-        fx.push({type:'shock',x:f.x,y:f.y,t:0});
-        f.flash={t:0,col:'#ff3b5c'};
-      }
-      feed(`🎯 매복 실패! ${f?f.name:'?'}의 ${actionText(l.predict)} 예측 빗나감${t&&l.actual?' · 실제 '+actionText(l.actual):''} · -${l.penalty}C`,'bad');
-      beep(150,.22,'sawtooth',.05);
-    }
-  } else if(l.type==='hack'){
+  if(l.type==='hack'){
     const col=l.betrayal?'#ff2e97':'#ff3b5c';
     fx.push({type:'bolt',a:l.from,b:l.to,t:0,betrayal:l.betrayal});
     if(t){
@@ -1189,11 +1341,14 @@ function confetti(win){
 }
 
 /* 탭이 숨겨지면 rAF가 멈춰 이펙트가 무한히 쌓이므로, 복귀 시 연출 큐를 비운다 */
-document.addEventListener('visibilitychange',()=>{if(document.hidden){fx.length=0;floats.length=0}});
+on(document,'visibilitychange',()=>{if(document.hidden){fx.length=0;floats.length=0}});
 
 let lastT=0;
+const raf=(typeof window.requestAnimationFrame==='function'
+  ?window.requestAnimationFrame.bind(window)
+  :cb=>setTimeout(()=>cb(Date.now()),33));
 function draw(ts){
-  requestAnimationFrame(draw);
+  raf(draw);
   const dt=Math.min(50,ts-lastT);lastT=ts;
   if(fx.length>600)fx.splice(0,fx.length-600);
   if(floats.length>120)floats.splice(0,floats.length-120);
@@ -1451,7 +1606,7 @@ function draw(ts){
       ctx.beginPath();ctx.arc(p.x,p.y,R+7,0,7);ctx.stroke();ctx.setLineDash([]);
       ctx.font='13px sans-serif';ctx.textAlign='center';
       ctx.fillText('👑',p.x,p.y-R-24);
-      ctx.fillStyle='#ffd166';ctx.font='bold 10.5px "Share Tech Mono",monospace';
+      ctx.fillStyle='#ffd166';ctx.font='bold 12px "Share Tech Mono",monospace';
       ctx.shadowColor='#ffd166';ctx.shadowBlur=8;
       ctx.fillText('현상금 '+bountyPot+'C',p.x,p.y-R-11);
       ctx.shadowBlur=0;ctx.textAlign='left';
@@ -1469,17 +1624,17 @@ function draw(ts){
       ctx.fillText('🔻',p.x+R+4,p.y-R-2);ctx.textAlign='left';
     }
     if(!p.connected&&!p.bot){
-      ctx.fillStyle='rgba(90,106,143,.9)';ctx.font='9px sans-serif';ctx.textAlign='center';
+      ctx.fillStyle='rgba(174,189,224,.96)';ctx.font='bold 10.5px sans-serif';ctx.textAlign='center';
       ctx.fillText('오프라인',p.x,p.y+R+30);ctx.textAlign='left';
     }
     /* 이름 + 크레딧 (외곽선으로 가독성 확보) */
     ctx.textAlign='center';ctx.lineJoin='round';
-    ctx.font=(isMe?'bold ':'')+'11.5px "Noto Sans KR"';
-    ctx.lineWidth=3;ctx.strokeStyle='rgba(2,4,12,.85)';
+    ctx.font=(isMe?'bold ':'600 ')+'13px "Noto Sans KR"';
+    ctx.lineWidth=4;ctx.strokeStyle='rgba(2,4,12,.92)';
     ctx.strokeText(p.name,p.x,p.y+R+14);
-    ctx.fillStyle=isMe?'#ffb3dd':'#c9d8f5';
+    ctx.fillStyle=isMe?'#ffc5e6':'#f2f7ff';
     ctx.fillText(p.name,p.x,p.y+R+14);
-    ctx.font='bold 11px "Share Tech Mono",monospace';
+    ctx.font='bold 12.5px "Share Tech Mono",monospace';
     const rk=rankMap.get(p.id);
     const ctext=Math.round(p.disp)+'C'+(rk<winnersN?' ◆':'');
     ctx.strokeText(ctext,p.x,p.y+R+27);
@@ -1520,12 +1675,24 @@ function draw(ts){
     ctx.fillStyle=rg;ctx.fillRect(0,0,w,h);
   }
 }
-requestAnimationFrame(draw);
+raf(draw);
 
 window.render_game_to_text=()=>JSON.stringify({
   screen:document.querySelector('.screen.on')?.id||'unknown',
   tutorial:{
-    choice:tutorialChoice,
+    stepId:currentTutorialStep?.().id||'',
+    stepIndex:tutorialState?.index??0,
+    round:currentTutorialStep?.().round||0,
+    phase:currentTutorialStep?.().phase||'',
+    ruleTags:currentTutorialStep?.().ruleTags||[],
+    availableActions:currentTutorialStep?.().actions||[],
+    selectedAction:tutorialChoice,
+    scores:currentTutorialStep?.().scores||{},
+    trust:currentTutorialStep?.().stage?.trust||0,
+    bounty:currentTutorialStep?.().stage?.bounty||0,
+    traitorMark:!!currentTutorialStep?.().stage?.traitor,
+    ranking:currentTutorialStep?.().ranking||[],
+    survivors:currentTutorialStep?.().survivors||[],
     title:$('tut-title')?.textContent||'',
     log:$('tut-log')?.textContent||'',
   },
@@ -1535,7 +1702,7 @@ window.render_game_to_text=()=>JSON.stringify({
     id:p.id,name:p.name,bot:p.bot,credits:p.credits,connected:p.connected,traitor:p.traitor,
     links:p.links||[]
   })),
-  selected, myAction, myTarget, myPredict
+  selected, myAction, myTarget
 });
 window.advanceTime=ms=>new Promise(resolve=>setTimeout(resolve,Math.max(0,ms||0)));
 </script>

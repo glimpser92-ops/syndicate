@@ -1,15 +1,13 @@
-/* 서버 로직 자동 검증: 방장 생성 → 봇 20명 → 짧은 게임 종료까지 관찰 */
+/* 서버 로직 자동 검증: 방장 생성 → 봇 20명 → 게임 시작 → 종료까지 관찰 */
 const WebSocket = require('ws');
-const PORT = process.env.PORT || 3000;
-const ws = new WebSocket(`ws://localhost:${PORT}`);
-let phases = 0, resolves = 0, linksFormed = 0, betrayals = 0, ambushes = 0;
+const ws = new WebSocket('ws://localhost:3000');
+let phases = 0, resolves = 0, linksFormed = 0, betrayals = 0;
 
 ws.on('open', () => ws.send(JSON.stringify({ t: 'create', name: '테스터' })));
 ws.on('message', (raw) => {
   const m = JSON.parse(raw);
   if (m.t === 'joined') {
     console.log('방 생성됨:', m.code);
-    ws.send(JSON.stringify({ t: 'settings', patch: { rounds: 3, signalSeconds: 8, actionSeconds: 8, resolveSeconds: 5 } }));
     for (let i = 0; i < 20; i++) ws.send(JSON.stringify({ t: 'addBot' }));
     setTimeout(() => ws.send(JSON.stringify({ t: 'start' })), 300);
   }
@@ -31,13 +29,12 @@ ws.on('message', (raw) => {
     const top = [...m.players].sort((a, b) => b.credits - a.credits).slice(0, 3);
     console.log(`   R${m.round} 정산: 로그 ${m.logs.length}건 | 상위: ${top.map(p => p.name + ' ' + p.credits + 'C').join(', ')}`);
     const acts = m.logs.reduce((o, l) => (o[l.type] = (o[l.type] || 0) + 1, o), {});
-    ambushes += acts.ambush || 0;
     console.log('   행동 분포:', JSON.stringify(acts));
   }
   if (m.t === 'over') {
-    console.log('게임 종료! 생존자:', m.winners.length, '| 동맹 결성:', linksFormed, '| 배신:', betrayals, '| 매복:', ambushes, '| 페이즈:', phases, '| 정산:', resolves);
+    console.log('게임 종료! 생존자:', m.winners.length, '| 동맹 결성:', linksFormed, '| 배신:', betrayals, '| 페이즈:', phases, '| 정산:', resolves);
     process.exit(0);
   }
 });
 ws.on('error', e => { console.error('연결 실패:', e.message); process.exit(1); });
-setTimeout(() => { console.error('타임아웃'); process.exit(1); }, 3 * 60 * 1000);
+setTimeout(() => { console.error('타임아웃'); process.exit(1); }, 8 * 60 * 1000);

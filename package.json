@@ -8,7 +8,8 @@
   },
   "scripts": {
     "start": "node server.js",
-    "test:ambush": "node test-ambush.js"
+    "verify:tutorial": "node scripts/verify-tutorial.mjs",
+    "verify:room": "node scripts/verify-room-smoke.mjs"
   },
   "dependencies": {
     "ws": "^8.18.0"

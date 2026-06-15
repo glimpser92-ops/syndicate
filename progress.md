@@ -13,6 +13,15 @@ Done:
 - Added host-adjustable live room rules and game-phase settings.
 - Added in-game reconnect code/link/QR surfaces and player rejoin tokens.
 - Verified host lobby, host monitor, student game UI, settings WebSocket updates, and in-game player rejoin.
+- Added a student entry QR code to the host lobby immediately after room creation.
+- Reworked the first-screen tutorial into a guided 3-round rule simulation with choices, phase navigation, and richer text-state verification.
+- Fixed tutorial back-navigation so returning from settlement preserves the current choice, while stepping back before the choice clears it.
+- Added guarded event, canvas, animation, and WebSocket fallbacks so the first-screen tutorial keeps running in restricted browser environments.
+- Verified the 3-round tutorial path through mining, bounty hacking, betrayal, final results, restart, and 390px mobile width; verified host room creation plus student join over WebSocket.
+- Added `scripts/verify-tutorial.mjs` to regression-check the scripted tutorial and `window.render_game_to_text` without needing a live browser.
+- Adjusted the first-screen layout after independent designer review: the home screen now starts from the top instead of vertical centering, mobile shows the tutorial before the join/create card, and mobile tutorial actions appear before the longer explanation block.
+- Added `scripts/verify-room-smoke.mjs` and `npm run verify:room` to durably regression-check host room creation, student join, max 20 participants, and host exclusion from the player list.
+- Received independent code-reviewer approval for the final tutorial/room behavior; an architect gate still needs to be rerun after the new room-smoke script.
 
 TODO:
-- No pending TODOs.
+- Rerun the independent architect final gate and update `.omx/ultragoal/quality-gate.json` from `review_blocked` only if it returns CLEAR.
