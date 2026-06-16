@@ -246,6 +246,10 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:98;
 .act-wall:hover,.act-wall.sel{background:rgba(0,229,255,.22);box-shadow:0 0 20px rgba(0,229,255,.35)}
 .act-hack{border-color:var(--red);color:var(--red);background:rgba(255,59,92,.07)}
 .act-hack:hover,.act-hack.sel{background:rgba(255,59,92,.22);box-shadow:0 0 20px rgba(255,59,92,.35)}
+.act-breach{border-color:var(--gold);color:var(--gold);background:rgba(255,209,102,.07)}
+.act-breach:hover,.act-breach.sel{background:rgba(255,209,102,.2);box-shadow:0 0 20px rgba(255,209,102,.32)}
+.act-betray{border-color:var(--pink);color:var(--pink);background:rgba(255,46,151,.07)}
+.act-betray:hover,.act-betray.sel{background:rgba(255,46,151,.2);box-shadow:0 0 20px rgba(255,46,151,.34)}
 .sig-btn{padding:10px 15px;border-radius:9px;font-size:14px;border:1px solid;transition:.15s}
 .sig-link{border-color:var(--green);color:var(--green)}
 .sig-link:hover,.sig-link.sel{background:rgba(61,255,180,.18)}
@@ -390,7 +394,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:98;
           <div class="rule-flow">
             <div class="rule-chip" data-tutorial-phase="event"><b>1. 이벤트</b><span>라운드마다 보상과 위험이 달라집니다.</span></div>
             <div class="rule-chip" data-tutorial-phase="signal"><b>2. 신호</b><span>동맹 제안, 경고, 이모지로 의도를 읽습니다.</span></div>
-            <div class="rule-chip" data-tutorial-phase="choice"><b>3. 선택</b><span>채굴, 방화벽, 해킹, 배신 중 하나를 고릅니다.</span></div>
+            <div class="rule-chip" data-tutorial-phase="choice"><b>3. 선택</b><span>채굴, 방화벽, 해킹, 우회, 배신 중 하나를 고릅니다.</span></div>
             <div class="rule-chip" data-tutorial-phase="settlement"><b>4. 정산</b><span>동시에 공개되고 크레딧과 표식이 바뀝니다.</span></div>
           </div>
           <div class="tut-explain">
@@ -405,7 +409,8 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:98;
         <button class="act-btn act-mine tut-choice" data-tutorial-action="mine">⛏ 채굴<small>동맹 보너스</small></button>
         <button class="act-btn act-wall tut-choice" data-tutorial-action="wall">🛡 방화벽<small>해킹 반격</small></button>
         <button class="act-btn act-hack tut-choice" data-tutorial-action="hack">⚡ 해킹<small>채굴자 탈취</small></button>
-        <button class="act-btn act-hack tut-choice" data-tutorial-action="betray">💔 배신<small>동맹 해킹</small></button>
+        <button class="act-btn act-breach tut-choice" data-tutorial-action="breach">🧬 우회<small>방어 뚫기</small></button>
+        <button class="act-btn act-betray tut-choice" data-tutorial-action="betray">💔 배신<small>동맹 해킹</small></button>
       </div>
       <div class="tut-nav">
         <button class="mini-btn" id="tut-prev" data-tutorial-control="prev">이전</button>
@@ -530,7 +535,9 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:98;
     <div class="dock-row" id="dock-actions" style="display:none">
       <button class="act-btn act-mine" data-act="mine">⛏ 채굴<small>+30 · 동맹+20 · 신뢰+8</small></button>
       <button class="act-btn act-wall" data-act="wall">🛡 방화벽<small>+10 · 오판 반격 45</small></button>
-      <button class="act-btn act-hack" data-act="hack">⚡ 해킹<small>해킹 40 · 배신 75+신뢰</small></button>
+      <button class="act-btn act-hack" data-act="hack">⚡ 해킹<small>비동맹 40</small></button>
+      <button class="act-btn act-breach" data-act="breach">🧬 우회<small>방어 25 · 실패 0</small></button>
+      <button class="act-btn act-betray" data-act="betray">💔 배신<small>동맹 75+신뢰</small></button>
     </div>
     <div class="dock-row" id="dock-signals" style="display:none">
       <button class="sig-btn sig-link" data-sig="propose">🤝 동맹 제안</button>
@@ -560,7 +567,7 @@ let players=new Map(), order=[], links=new Set();
 let phase='lobby', phaseEnds=0, phaseDur=1, round=1, rounds=7;
 let curEvent={name:'표준 프로토콜'}, bounty=null, winnersN=4;
 let linkAges={}, bountyPot=0, jackpotTo=null;
-let selected=null, selMode=null, myAction=null, myTarget=null;
+let selected=null, selMode=null, myAction=null, myTarget=null, lastPersonalAttacks=[];
 let roomSettings={}, maxPlayers=20, minPlayers=4;
 const $=id=>document.getElementById(id);
 function on(el,type,handler){
@@ -619,12 +626,16 @@ function applySettings(settings={}){
     if(Object.prototype.hasOwnProperty.call(roomSettings,key)&&document.activeElement!==input)input.value=roomSettings[key];
   });
   const s=roomSettings;
-  const bm=document.querySelector('#dock-actions .act-mine small');
+  const bm=document.querySelector('#dock-actions [data-act="mine"] small');
   if(bm&&s.mineBase!=null)bm.textContent=`+${s.mineBase} · 동맹+${s.allyMineBonus} · 신뢰+${s.trustMineBonus}`;
-  const bw=document.querySelector('#dock-actions .act-wall small');
+  const bw=document.querySelector('#dock-actions [data-act="wall"] small');
   if(bw&&s.wallBase!=null)bw.textContent=`+${s.wallBase} · 오판 반격 ${s.counter}`;
-  const bh=document.querySelector('#dock-actions .act-hack small');
-  if(bh&&s.steal!=null)bh.textContent=`해킹 ${s.steal} · 배신 ${s.betraySteal}+신뢰${s.trustBetrayBonus}`;
+  const bh=document.querySelector('#dock-actions [data-act="hack"] small');
+  if(bh&&s.steal!=null)bh.textContent=`비동맹 ${s.steal}`;
+  const bb=document.querySelector('#dock-actions [data-act="breach"] small');
+  if(bb&&s.breachSteal!=null)bb.textContent=`방어 ${s.breachSteal} · 실패 0`;
+  const bt=document.querySelector('#dock-actions [data-act="betray"] small');
+  if(bt&&s.betraySteal!=null)bt.textContent=`동맹 ${s.betraySteal}+신뢰${s.trustBetrayBonus}`;
 }
 
 const invitedCode=cleanCode(new URLSearchParams(location.search).get('room')||new URLSearchParams(location.search).get('code'));
@@ -720,6 +731,7 @@ const tutorialActionCopy={
   mine:{label:'⛏ 채굴',hint:'협력 수익'},
   wall:{label:'🛡 방화벽',hint:'해킹 반격'},
   hack:{label:'⚡ 해킹',hint:'타깃 탈취'},
+  breach:{label:'🧬 우회',hint:'방어 뚫기'},
   betray:{label:'💔 배신',hint:'동맹 해킹'},
 };
 const tutorialPhaseCopy={event:'EVENT',signal:'SIGNAL',choice:'CHOICE',settlement:'SETTLE',final:'FINAL'};
@@ -738,6 +750,7 @@ const tutorialScoreBranches={
     mine:{me:274,ally:274,rival:190,guard:160},
     wall:{me:230,ally:205,rival:175,guard:190},
     hack:{me:265,ally:180,rival:130,guard:160},
+    breach:{me:249,ally:208,rival:180,guard:135},
     betray:{me:313,ally:103,rival:180,guard:160},
   },
 };
@@ -794,10 +807,10 @@ const tutorialSteps=[
     rules:['신뢰가 높을수록 협력 보너스가 커집니다.','동맹을 해킹하면 큰 보상이 있지만 낙인이 남습니다.'],
     log:'SIGNAL · ALLY는 협력을 요청합니다. RIVAL은 경고를 보냅니다.',note:'신뢰가 높은 순간일수록 배신의 유혹도 커집니다.',
     ruleTags:['signal','trust','betrayal'],stage:{event:'신뢰 고점',trust:2,bounty:60,traitor:false,rank:'최종 신호',link:'on'},leader:['me']},
-  {id:'r3-choice',round:3,phase:'choice',choiceKey:'r3',scoreChoice:'r2',defaultAction:'mine',title:'선택 · 최종 행동',body:'협력을 유지하거나, 방화벽으로 버티거나, 해킹으로 순위를 흔들거나, 동맹을 배신할 수 있습니다.',
-    rules:['배신은 큰 탈취를 주지만 다음 표적이 됩니다.','최종 생존은 상위권 순위로 결정됩니다.'],
+  {id:'r3-choice',round:3,phase:'choice',choiceKey:'r3',scoreChoice:'r2',defaultAction:'mine',title:'선택 · 최종 행동',body:'협력을 유지하거나, 방어하고, 공격하고, 방어를 우회하고, 동맹을 배신할 수 있습니다.',
+    rules:['배신 > 채굴 > 우회 > 방화벽 > 해킹 > 배신 순서로 서로 물립니다.','최종 생존은 상위권 순위로 결정됩니다.'],
     log:'CHOICE · 마지막 행동을 고르세요.',note:'이번 선택 뒤에는 최종 순위가 공개됩니다.',
-    ruleTags:['choice','betrayal','survival'],actions:['mine','wall','hack','betray'],actionText:{mine:{label:'⛏ 협력 유지',hint:'66C 성장'},wall:{label:'🛡 방화벽',hint:'표적 방어'},hack:{label:'⚡ 해킹',hint:'순위 흔들기'},betray:{label:'💔 배신',hint:'105C 탈취'}},stage:{event:'신뢰 고점',trust:2,bounty:60,traitor:false,rank:'최종 선택',link:'on'},leader:['me']},
+    ruleTags:['choice','betrayal','breach','survival'],actions:['mine','wall','hack','breach','betray'],actionText:{mine:{label:'⛏ 협력 유지',hint:'66C 성장'},wall:{label:'🛡 방화벽',hint:'표적 방어'},hack:{label:'⚡ 해킹',hint:'순위 흔들기'},breach:{label:'🧬 우회',hint:'방어 25C'},betray:{label:'💔 배신',hint:'105C 탈취'}},stage:{event:'신뢰 고점',trust:2,bounty:60,traitor:false,rank:'최종 선택',link:'on'},leader:['me']},
   {id:'r3-settle',round:3,phase:'settlement',choiceKey:'r3',defaultAction:'mine',ruleTags:['settlement','betrayal','traitor-mark','survival'],
     stage:{event:'대숙청',trust:3,bounty:60,traitor:false,rank:'정산 완료',link:'on'},
     branches:{
@@ -807,6 +820,8 @@ const tutorialSteps=[
         rules:['방화벽은 마지막 라운드의 보험입니다.','공격받을 때만 최고의 효율을 냅니다.'],log:'SETTLE · 방어 성공 · 생존권 유지',note:'읽히는 순간에도 버티는 선택지가 있습니다.',scores:tutorialScoreBranches.r3.wall,stage:{trust:2,bounty:70,traitor:false,link:'on'},bump:['me'],hit:['rival']},
       hack:{title:'정산 · 순위 흔들기',body:'해킹으로 경쟁자를 끌어내려 순위를 올립니다. 방화벽을 만나지 않았기 때문에 큰 손해는 피했습니다.',
         rules:['해킹은 채굴자를 상대로 강합니다.','순위 싸움에서는 공격 타깃 선택이 중요합니다.'],log:'SETTLE · YOU +50C · RIVAL -50C',note:'공격은 순위를 바꾸지만 신뢰를 키우지는 못합니다.',scores:tutorialScoreBranches.r3.hack,stage:{trust:1,bounty:20,traitor:false,link:'on'},bump:['me'],hit:['rival']},
+      breach:{title:'정산 · 방어 우회',body:'방어할 것 같은 상대를 우회해 방화벽 수익을 끊고 25C를 빼앗습니다. 채굴자를 찍었다면 아무것도 얻지 못합니다.',
+        rules:['우회는 방화벽을 상대로만 성공합니다.','성공한 방화벽은 이번 라운드 수익과 반격을 잃습니다.'],log:'SETTLE · YOU +25C · GUARD -25C · WALL 0C',note:'방어가 너무 좋아 보일 때 넣는 압박 카드입니다.',scores:tutorialScoreBranches.r3.breach,stage:{trust:1,bounty:20,traitor:false,link:'on'},bump:['me'],hit:['guard']},
       betray:{title:'정산 · 동맹 배신',body:'동맹을 해킹해 큰 크레딧을 얻습니다. 대신 배신자 낙인이 찍혀 모두에게 위험한 표적이 됩니다.',
         rules:['배신은 한 번에 105C를 빼앗는 가장 큰 유혹입니다.','배신자 낙인은 다음 라운드 해킹을 더 아프게 만듭니다.'],log:'SETTLE · YOU +105C · ALLY -105C · TRAITOR MARK',note:'붉은 동맹선은 신뢰가 끊어지고 다음 라운드 표적이 된 상태입니다.',scores:tutorialScoreBranches.r3.betray,stage:{trust:0,bounty:20,traitor:true,link:'broken'},bump:['me'],hit:['ally'],traitor:['me']},
     }},
@@ -818,6 +833,8 @@ const tutorialSteps=[
         rules:['방어는 점수 폭발보다 손실 방지에 강합니다.','순위권을 지키는 것도 승리 전략입니다.'],log:'FINAL · YOU 230C · 방어로 생존권 유지',note:'공격받을 것 같다면 방화벽이 순위를 지킵니다.',scores:tutorialScoreBranches.r3.wall,stage:{traitor:false,rank:'YOU 생존권',link:'on'},bump:['me'],hit:['rival'],ranking:['YOU','ALLY','GUARD','RIVAL'],survivors:['YOU']},
       hack:{title:'최종 · 공격 생존권',body:'해킹으로 라이벌을 끌어내리고 생존권에 들어갑니다. 공격은 빠르지만 방화벽 위험을 항상 계산해야 합니다.',
         rules:['해킹은 순위를 뒤집는 공격 선택입니다.','방화벽을 만날 경우 결과가 반대로 바뀔 수 있습니다.'],log:'FINAL · YOU 265C · RIVAL 130C · 생존권',note:'타깃 선택이 생존과 탈락을 가릅니다.',scores:tutorialScoreBranches.r3.hack,stage:{traitor:false,rank:'YOU 생존권',link:'on'},bump:['me'],hit:['rival'],ranking:['YOU','ALLY','GUARD','RIVAL'],survivors:['YOU']},
+      breach:{title:'최종 · 우회 생존권',body:'방어를 고른 상대를 정확히 읽어 점수 차를 벌렸습니다. 우회는 방어 선두가 너무 안전해지는 것을 막습니다.',
+        rules:['우회는 방어를 견제하는 다섯 번째 선택입니다.','채굴·해킹·배신을 상대로는 빗나갈 수 있습니다.'],log:'FINAL · YOU 249C · GUARD 135C · 방어 우회',note:'읽은 방어는 수익이 아니라 약점이 됩니다.',scores:tutorialScoreBranches.r3.breach,stage:{traitor:false,rank:'YOU 생존권',link:'on'},bump:['me'],hit:['guard'],ranking:['YOU','ALLY','RIVAL','GUARD'],survivors:['YOU']},
       betray:{title:'최종 · 배신의 대가',body:'점수는 크게 올랐지만 배신자 낙인이 남았습니다. 실제 게임에서는 다음 라운드에 더 크게 털릴 수 있어 너무 이른 배신은 위험합니다.',
         rules:['배신은 한 번에 가장 큰 점수를 줍니다.','낙인은 모두에게 보이는 위험 신호입니다.'],log:'FINAL · YOU 313C · TRAITOR MARK · 생존권이지만 표적',note:'높은 점수와 높은 위험이 함께 옵니다.',scores:tutorialScoreBranches.r3.betray,stage:{traitor:true,rank:'YOU 고위험 생존권',link:'broken'},bump:['me'],hit:['ally'],traitor:['me'],ranking:['YOU','RIVAL','GUARD','ALLY'],survivors:['YOU']},
     }},
@@ -911,7 +928,7 @@ function chooseTutorialAction(action){
   tutorialState.choices[step.choiceKey]=action;
   tutorialChoice=action;
   renderTutorial();
-  beep(action==='betray'?150:action==='wall'?560:action==='hack'?300:760,.08,action==='mine'?'sine':'square',.035);
+  beep(action==='betray'?150:action==='breach'?430:action==='wall'?560:action==='hack'?300:760,.08,action==='mine'?'sine':'square',.035);
 }
 function moveTutorial(delta){
   const step=currentTutorialStep();
@@ -1032,6 +1049,7 @@ function onPhase(m){
   $('dock-emojis').style.display=!isHost()&&phase==='signal'?'flex':'none';
   document.querySelectorAll('#dock-actions .act-btn,#dock-signals .sig-btn').forEach(b=>b.classList.remove('sel'));
   myAction=null;myTarget=null;
+  if(phase!=='resolve')lastPersonalAttacks=[];
   if(phase==='event'){
     $('ev-round').textContent='ROUND '+round+(round===rounds?' - FINAL':'');
     $('ev-name').textContent=curEvent.name;
@@ -1132,11 +1150,16 @@ function onLinkBroken(m){
 document.querySelectorAll('#dock-actions .act-btn').forEach(b=>{
   b.onclick=()=>{
     const act=b.dataset.act;
-    if(act==='hack'){
-      selMode='hack';
+    if(['hack','breach','betray'].includes(act)){
+      selMode=act;
       document.querySelectorAll('#dock-actions .act-btn').forEach(x=>x.classList.remove('sel'));
       b.classList.add('sel');
-      hint(`해킹할 <b>노드를 클릭</b>하세요 — 동맹 해킹 시 <b style="color:var(--red)">배신(${roomSettings.betraySteal||60}+신뢰 보너스 탈취 + 낙인)</b>`);
+      const hints={
+        hack:`해킹할 <b>비동맹 노드</b>를 클릭하세요 — 채굴자는 ${roomSettings.steal||40}C, 해킹 중이면 ${roomSettings.hackVsHack||20}C`,
+        breach:`방어할 것 같은 <b>노드</b>를 클릭하세요 — 방화벽이면 ${roomSettings.breachSteal||25}C 탈취, 아니면 실패`,
+        betray:`배신할 <b>동맹 노드</b>를 클릭하세요 — ${roomSettings.betraySteal||75}+신뢰 보너스 탈취 + 낙인`
+      };
+      hint(hints[act]);
       return;
     }
     selMode=null;
@@ -1147,7 +1170,7 @@ function onActionOk(m){
   myAction=m.act;myTarget=m.target;
   document.querySelectorAll('#dock-actions .act-btn').forEach(x=>x.classList.toggle('sel',x.dataset.act===m.act));
   const t=m.target?players.get(m.target):null;
-  hint(`✅ <b>${{mine:'⛏ 채굴',wall:'🛡 방화벽',hack:'⚡ 해킹'}[m.act]}${t?' → '+esc(t.name):''}</b> 전송됨 — 마감 전까지 변경 가능`);
+  hint(`✅ <b>${{mine:'⛏ 채굴',wall:'🛡 방화벽',hack:'⚡ 해킹',breach:'🧬 우회',betray:'💔 배신'}[m.act]}${t?' → '+esc(t.name):''}</b> 전송됨 — 마감 전까지 변경 가능`);
   beep(980,.06,'sine',.05);
 }
 
@@ -1180,9 +1203,13 @@ on(cv,'pointerdown',e=>{
     if(selMode==='warn')feedSelf();
     selMode=null;document.querySelectorAll('.sig-btn').forEach(x=>x.classList.remove('sel'));
     hint('');
-  } else if(phase==='action'&&selMode==='hack'){
-    send({t:'action',act:'hack',target:best.id});
-    selMode=null;
+  } else if(phase==='action'&&['hack','breach','betray'].includes(selMode)){
+    const allied=links.has(linkKey(myId,best.id));
+    if(selMode==='hack'&&allied){toast('동맹은 배신 버튼으로만 공격할 수 있습니다');return}
+    if(selMode==='betray'&&!allied){toast('배신은 동맹에게만 사용할 수 있습니다');return}
+    send({t:'action',act:selMode,target:best.id});
+    selMode=null;document.querySelectorAll('#dock-actions .act-btn').forEach(x=>x.classList.remove('sel'));
+    hint('');
   } else {
     selected=best.id===selected?null:best.id;
   }
@@ -1203,11 +1230,28 @@ function onResolve(m){
   $('dock-actions').style.display='none';$('dock-signals').style.display='none';$('dock-emojis').style.display='none';
   hint('정산 중...');
   const newCredits=new Map(m.players.map(p=>[p.id,p.credits]));
-  // 로그 순차 재생
-  const hacks=m.logs.filter(l=>l.type==='hack'||l.type==='blocked');
-  const rest=m.logs.filter(l=>l.type!=='hack'&&l.type!=='blocked');
+  const names=new Map(m.players.map(p=>[p.id,p.name]));
+  const attackTypes=new Set(['hack','betray','breach','blocked']);
+  const attackLabel={hack:'해킹',betray:'배신',breach:'우회'};
+  lastPersonalAttacks=m.logs.filter(l=>attackTypes.has(l.type)&&l.to===myId).map(l=>({
+    actionType:l.type==='blocked'?(l.action||'hack'):l.type,
+    from:l.from,
+    name:players.get(l.from)?.name||names.get(l.from)||'?',
+    action:attackLabel[l.type==='blocked'?(l.action||'hack'):l.type]||l.type,
+    amount:l.amount||0,
+    blocked:l.type==='blocked',
+    success:l.success!==false,
+    miss:!!l.miss,
+  }));
+  if(lastPersonalAttacks.length){
+    const summary=lastPersonalAttacks.map(a=>`${a.name}(${a.action}${a.miss?' 실패':''})`).join(', ');
+    feed(`🚨 나를 공격한 플레이어: ${summary}`,'bad');
+    toast(`공격자: ${summary}`);
+  }
+  const attacks=m.logs.filter(l=>attackTypes.has(l.type));
+  const rest=m.logs.filter(l=>!attackTypes.has(l.type));
   let delay=400;
-  hacks.forEach(l=>{
+  attacks.forEach(l=>{
     setTimeout(()=>playLog(l),delay);delay+=560;
   });
   setTimeout(()=>{rest.forEach((l,i)=>setTimeout(()=>playLog(l),i*90))},delay);
@@ -1221,9 +1265,10 @@ function onResolve(m){
 }
 function playLog(l){
   const f=players.get(l.from),t=l.to?players.get(l.to):null;
-  if(l.type==='hack'){
-    const col=l.betrayal?'#ff2e97':'#ff3b5c';
-    fx.push({type:'bolt',a:l.from,b:l.to,t:0,betrayal:l.betrayal});
+  if(l.type==='hack'||l.type==='betray'){
+    const isBetray=l.type==='betray'||l.betrayal;
+    const col=isBetray?'#ff2e97':'#ff3b5c';
+    fx.push({type:'bolt',a:l.from,b:l.to,t:0,betrayal:isBetray});
     if(t){
       t.disp=Math.max(0,t.disp-l.amount);
       float(t.x,t.y,'-'+l.amount,'#ff3b5c',true);
@@ -1235,13 +1280,33 @@ function playLog(l){
     }
     if(f){
       f.disp+=l.amount+(l.bounty||0);
-      float(f.x,f.y-22,'+'+l.amount,l.betrayal?'#ff2e97':'#ffd166',true);
+      float(f.x,f.y-22,'+'+l.amount,isBetray?'#ff2e97':'#ffd166',true);
       if(l.bounty)float(f.x,f.y-48,'👑 현상금 +'+l.bounty,'#ffd166',true);
       f.flash={t:0,col:'#ffd166'};
     }
-    feed(`${l.betrayal?'💔 배신 해킹!':'⚡'} ${f?f.name:'?'} → ${t?t.name:'?'} ${l.amount}C 탈취${l.bounty?` (+현상금 ${l.bounty})`:''}${l.trust?` · 신뢰 ${l.trust}단계 배신`:''}`,l.betrayal?'bad':'');
-    beep(l.betrayal?140:300,.15,'sawtooth',.05);
+    feed(`${isBetray?'💔 배신!':'⚡ 해킹'} ${f?f.name:'?'} → ${t?t.name:'?'} ${l.amount}C 탈취${l.bounty?` (+현상금 ${l.bounty})`:''}${l.trust?` · 신뢰 ${l.trust}단계 배신`:''}`,isBetray?'bad':'');
+    beep(isBetray?140:300,.15,'sawtooth',.05);
+  } else if(l.type==='breach'){
+    const col=l.success?'#ffd166':'#8ea0c8';
+    fx.push({type:'bolt',a:l.from,b:l.to,t:0,breach:true});
+    if(t&&l.amount>0){
+      t.disp=Math.max(0,t.disp-l.amount);
+      float(t.x,t.y,'-'+l.amount,'#ffd166',true);
+      t.flash={t:0,col};
+      if(l.to===myId){
+        fx.push({type:'flash',col:'255,209,102',t:0});
+        document.body.classList.remove('shake');void document.body.offsetWidth;document.body.classList.add('shake');
+      }
+    }
+    if(f&&l.amount>0){
+      f.disp+=l.amount;
+      float(f.x,f.y-22,'+'+l.amount,'#ffd166',true);
+      f.flash={t:0,col:'#ffd166'};
+    }
+    feed(l.success?`🧬 우회! ${f?f.name:'?'} → ${t?t.name:'?'} 방화벽에서 ${l.amount}C 탈취`:`🧬 ${f?f.name:'?'}의 우회 실패 → ${t?t.name:'?'} 0C`,l.success?'':'bad');
+    beep(l.success?430:190,.12,'triangle',.04);
   } else if(l.type==='blocked'){
+    const blockedLabel=(l.action||'hack')==='betray'?'배신':'해킹';
     fx.push({type:'bolt',a:l.from,b:l.to,t:0,blocked:true});
     if(t){
       t.disp+=l.amount;float(t.x,t.y,'+'+l.amount,'#00e5ff',true);
@@ -1252,7 +1317,7 @@ function playLog(l){
       f.disp=Math.max(0,f.disp-l.amount);float(f.x,f.y-22,'-'+l.amount,'#ff3b5c',true);
       if(l.from===myId)fx.push({type:'flash',col:'0,229,255',t:0});
     }
-    feed(`🛡 ${t?t.name:'?'}이(가) ${f?f.name:'?'}의 해킹을 반격! +${l.amount}C`,'good');
+    feed(`🛡 ${t?t.name:'?'}이(가) ${f?f.name:'?'}의 ${blockedLabel}을 반격! +${l.amount}C`,'good');
     beep(560,.1,'square',.04);
   } else if(l.type==='mine'){
     if(f){
@@ -1714,7 +1779,8 @@ window.render_game_to_text=()=>JSON.stringify({
     id:p.id,name:p.name,bot:p.bot,credits:p.credits,connected:p.connected,traitor:p.traitor,
     links:p.links||[]
   })),
-  selected, myAction, myTarget
+  selected, myAction, myTarget, lastPersonalAttacks,
+  liveActions:[...document.querySelectorAll('#dock-actions .act-btn')].map(b=>({act:b.dataset.act,text:b.textContent.trim(),selected:b.classList.contains('sel'),disabled:!!b.disabled}))
 });
 window.advanceTime=ms=>new Promise(resolve=>setTimeout(resolve,Math.max(0,ms||0)));
 </script>

@@ -140,7 +140,7 @@ function createDom() {
     return screen;
   });
 
-  const actionElements = ['mine', 'wall', 'hack', 'betray'].map((action) => {
+  const actionElements = ['mine', 'wall', 'hack', 'breach', 'betray'].map((action) => {
     const node = element(`action-${action}`, 'act-btn tut-choice');
     node.dataset.tutorialAction = action;
     return node;
@@ -308,6 +308,7 @@ next.onclick();
 next.onclick();
 next.onclick();
 next.onclick();
+snap('r3-choice-before');
 action('betray').onclick();
 next.onclick();
 next.onclick();
@@ -337,6 +338,10 @@ const checks = {
   finalIsBetrayMarked:
     snapshots.find((s) => s.label === 'final-betray').tutorial.phase === 'final' &&
     snapshots.find((s) => s.label === 'final-betray').tutorial.traitorMark === true,
+  r3ChoiceShowsFiveActions:
+    snapshots.find((s) => s.label === 'r3-choice-before').tutorial.availableActions.length === 5 &&
+    snapshots.find((s) => s.label === 'r3-choice-before').tutorial.availableActions.includes('breach') &&
+    snapshots.find((s) => s.label === 'r3-choice-before').tutorial.availableActions.includes('betray'),
   finalBetrayShowsSpikeAndRisk:
     snapshots.find((s) => s.label === 'final-betray').tutorial.scores.me === 313 &&
     snapshots.find((s) => s.label === 'final-betray').tutorial.log.includes('TRAITOR MARK') &&
@@ -364,6 +369,7 @@ const result = {
     note: snapshot.tutorial.note,
     scores: snapshot.tutorial.scores,
     trust: snapshot.tutorial.trust,
+    availableActions: snapshot.tutorial.availableActions,
     nextDisabled: snapshot.nextDisabled,
     traitorMark: snapshot.tutorial.traitorMark,
   })),

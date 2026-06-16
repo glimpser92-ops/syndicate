@@ -2,13 +2,16 @@ import { spawn } from 'node:child_process';
 import net from 'node:net';
 import WebSocket from 'ws';
 
-const STUDENTS = ['Alpha', 'Beta', 'Cipher', 'Delta'];
+const STUDENTS = ['Alpha', 'Beta', 'Cipher', 'Delta', 'Echo', 'Flux'];
 const TARGETS = {
   cooperationAge0: 50,
   cooperationAge1: 58,
   betrayalAge2: 105,
   firewallCounter: 45,
   traitorMultiplierSteal: 72,
+  breachWall: 25,
+  breachMiss: 0,
+  wallSuppressedByBreach: 0,
 };
 
 function getFreePort() {
@@ -143,6 +146,7 @@ function eventMultiplier(event, kind) {
   if (kind === 'mine') return global * (event?.mine || 1);
   if (kind === 'hack') return global * (event?.hack || 1);
   if (kind === 'betrayal') return global * (event?.hack || 1) * (event?.betray || 1);
+  if (kind === 'breach') return global;
   if (kind === 'counter') return global * (event?.counter || 1);
   return global;
 }
@@ -176,8 +180,8 @@ async function createRoom(port) {
   }
 
   const room = await host.waitFor(
-    (m) => m.t === 'room' && m.code === hostJoined.code && Array.isArray(m.players) && m.players.length === 4,
-    'host sees four students',
+    (m) => m.t === 'room' && m.code === hostJoined.code && Array.isArray(m.players) && m.players.length === STUDENTS.length,
+    'host sees all students',
   );
 
   host.send({ t: 'settings', patch: { rounds: 3, signalSeconds: 8, actionSeconds: 8, resolveSeconds: 5 } });
@@ -224,7 +228,7 @@ async function runScenario(port) {
     assertEqual(
       checks,
       'bot safety',
-      'scenario uses four human participants and no bots',
+      'scenario uses all human participants and no bots',
       r1Event.players.filter((p) => p.bot).length,
       0,
       { round: 1, studentCount: r1Event.players.length, names: r1Event.players.map((p) => p.name) },
@@ -236,8 +240,10 @@ async function runScenario(port) {
     await sendActions(students, {
       Alpha: { act: 'mine' },
       Beta: { act: 'mine' },
-      Cipher: { act: 'hack', target: ids.Delta },
+      Cipher: { act: 'betray', target: ids.Delta },
       Delta: { act: 'mine' },
+      Echo: { act: 'breach', target: ids.Flux },
+      Flux: { act: 'wall' },
     });
     const r1 = await resolveWaiter(host, 1);
     observations.rounds.push({ round: 1, event: r1Event.event, logs: r1.logs, players: r1.players });
@@ -245,8 +251,18 @@ async function runScenario(port) {
     const r1AlphaMine = logBy(r1.logs, (l) => l.type === 'mine' && l.from === ids.Alpha, 'round 1 Alpha mine');
     const r1CipherBetray = logBy(
       r1.logs,
-      (l) => l.type === 'hack' && l.from === ids.Cipher && l.to === ids.Delta && l.betrayal === true,
+      (l) => l.type === 'betray' && l.from === ids.Cipher && l.to === ids.Delta && l.betrayal === true,
       'round 1 Cipher betrayal',
+    );
+    const r1EchoBreach = logBy(
+      r1.logs,
+      (l) => l.type === 'breach' && l.from === ids.Echo && l.to === ids.Flux,
+      'round 1 Echo breach against wall',
+    );
+    const r1FluxWall = logBy(
+      r1.logs,
+      (l) => l.type === 'wall' && l.from === ids.Flux,
+      'round 1 Flux breached wall income',
     );
     assertEqual(
       checks,
@@ -272,6 +288,22 @@ async function runScenario(port) {
       expectedAmount(75, r1Event.event, 'betrayal'),
       { round: 1, event: r1Event.event?.id, trust: r1CipherBetray.trust },
     );
+    assertEqual(
+      checks,
+      'breach counterplay',
+      'breach steals the approved amount from a wall target',
+      r1EchoBreach.amount,
+      expectedAmount(TARGETS.breachWall, r1Event.event, 'breach'),
+      { round: 1, event: r1Event.event?.id, success: r1EchoBreach.success },
+    );
+    assertEqual(
+      checks,
+      'breach counterplay',
+      'breach suppresses wall income for the breached defender',
+      r1FluxWall.amount,
+      TARGETS.wallSuppressedByBreach,
+      { round: 1, event: r1Event.event?.id, breached: r1FluxWall.breached },
+    );
 
     const r2Event = await phaseWaiter(host, 2, 'event');
     assertEqual(
@@ -289,6 +321,8 @@ async function runScenario(port) {
       Beta: { act: 'mine' },
       Cipher: { act: 'mine' },
       Delta: { act: 'hack', target: ids.Cipher },
+      Echo: { act: 'breach', target: ids.Alpha },
+      Flux: { act: 'wall' },
     });
     const r2 = await resolveWaiter(host, 2);
     observations.rounds.push({ round: 2, event: r2Event.event, logs: r2.logs, players: r2.players });
@@ -298,6 +332,11 @@ async function runScenario(port) {
       r2.logs,
       (l) => l.type === 'hack' && l.from === ids.Delta && l.to === ids.Cipher,
       'round 2 marked traitor hit',
+    );
+    const r2EchoMiss = logBy(
+      r2.logs,
+      (l) => l.type === 'breach' && l.from === ids.Echo && l.to === ids.Alpha,
+      'round 2 Echo breach miss against non-wall',
     );
     assertEqual(
       checks,
@@ -315,6 +354,14 @@ async function runScenario(port) {
       expectedAmount(TARGETS.traitorMultiplierSteal, r2Event.event, 'hack'),
       { round: 2, event: r2Event.event?.id, targetTraitor: byName(r2Event.players, 'Cipher').traitor },
     );
+    assertEqual(
+      checks,
+      'breach counterplay',
+      'breach against a non-wall target records a zero-credit miss',
+      r2EchoMiss.amount,
+      TARGETS.breachMiss,
+      { round: 2, event: r2Event.event?.id, success: r2EchoMiss.success, miss: r2EchoMiss.miss },
+    );
 
     const r3Event = await phaseWaiter(host, 3, 'event');
     assertEqual(
@@ -328,17 +375,19 @@ async function runScenario(port) {
     await phaseWaiter(host, 3, 'signal');
     await phaseWaiter(host, 3, 'action');
     await sendActions(students, {
-      Alpha: { act: 'hack', target: ids.Beta },
+      Alpha: { act: 'betray', target: ids.Beta },
       Beta: { act: 'mine' },
       Cipher: { act: 'hack', target: ids.Delta },
       Delta: { act: 'wall' },
+      Echo: { act: 'mine' },
+      Flux: { act: 'wall' },
     });
     const r3 = await resolveWaiter(host, 3);
     observations.rounds.push({ round: 3, event: r3Event.event, logs: r3.logs, players: r3.players });
 
     const r3Betray = logBy(
       r3.logs,
-      (l) => l.type === 'hack' && l.from === ids.Alpha && l.to === ids.Beta && l.betrayal === true,
+      (l) => l.type === 'betray' && l.from === ids.Alpha && l.to === ids.Beta && l.betrayal === true,
       'round 3 aged betrayal',
     );
     const r3Firewall = logBy(
@@ -360,6 +409,14 @@ async function runScenario(port) {
       'wrong hack into firewall loses the approved punishment amount after event modifiers',
       r3Firewall.amount,
       expectedAmount(TARGETS.firewallCounter, r3Event.event, 'counter'),
+      { round: 3, event: r3Event.event?.id },
+    );
+    assertEqual(
+      checks,
+      'firewall counter',
+      'blocked non-ally attack preserves hack attribution',
+      r3Firewall.action,
+      'hack',
       { round: 3, event: r3Event.event?.id },
     );
 

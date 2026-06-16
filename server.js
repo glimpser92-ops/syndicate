@@ -22,6 +22,7 @@ const WALL_BASE = 10;
 const COUNTER = 45;           // 방화벽이 해커에게서 뺏는 양
 const STEAL = 40;             // 채굴자 해킹 탈취량
 const BETRAY_STEAL = 75;      // 동맹 배신 탈취량
+const BREACH_STEAL = 25;
 const TRUST_BETRAY_BONUS = 15;
 const TRUST_BETRAY_CAP = 60;
 const HACK_VS_HACK = 20;      // 해킹 중인 대상 해킹 탈취량
@@ -40,6 +41,7 @@ const DEFAULT_SETTINGS = {
   counter: COUNTER,
   steal: STEAL,
   betraySteal: BETRAY_STEAL,
+  breachSteal: BREACH_STEAL,
   trustBetrayBonus: TRUST_BETRAY_BONUS,
   hackVsHack: HACK_VS_HACK,
   bountyBase: BOUNTY_BASE,
@@ -385,14 +387,18 @@ class Room {
 
   handleAction(p, msg) {
     if (this.phase !== 'action') return;
-    if (!['mine', 'hack', 'wall'].includes(msg.act)) return;
-    if (msg.act === 'hack') {
+    let act = String(msg.act || '');
+    if (!['mine', 'hack', 'wall', 'betray', 'breach'].includes(act)) return;
+    if (['hack', 'betray', 'breach'].includes(act)) {
       const t = this.players.get(msg.target);
       if (!t || t.id === p.id) return;
+      const allied = this.links.has(linkKey(p.id, t.id));
+      if (act === 'hack' && allied) act = 'betray';
+      if (act === 'betray' && !allied) return;
       p.target = t.id;
     } else p.target = null;
-    p.action = msg.act;
-    this.send(p, { t: 'actionOk', act: msg.act, target: p.target });
+    p.action = act;
+    this.send(p, { t: 'actionOk', act, target: p.target });
   }
 
   /* ----- 라운드 정산 ----- */
@@ -407,24 +413,37 @@ class Room {
       if (!p.action) { p.action = 'wall'; p.target = null; } // 미입력은 방화벽
     }
 
-    // 1) 해킹 정산
-    for (const h of players.filter(x => x.action === 'hack')) {
+    const breachedWalls = new Set();
+
+    for (const b of players.filter(x => x.action === 'breach')) {
+      const t = this.players.get(b.target);
+      if (!t) continue;
+      if (t.action === 'wall') {
+        const amt = Math.min(t.credits, mul(s.breachSteal || BREACH_STEAL));
+        t.credits -= amt; b.credits += amt;
+        breachedWalls.add(t.id);
+        logs.push({ type: 'breach', from: b.id, to: t.id, amount: amt, success: true });
+      } else {
+        logs.push({ type: 'breach', from: b.id, to: t.id, amount: 0, success: false, miss: true });
+      }
+    }
+
+    for (const h of players.filter(x => x.action === 'hack' || x.action === 'betray')) {
       const t = this.players.get(h.target);
       if (!t) continue;
       const allied = this.links.has(linkKey(h.id, t.id));
-      if (t.action === 'wall' && !ev.blackout) {
+      const betrayal = h.action === 'betray' || allied;
+      if (t.action === 'wall' && !ev.blackout && !breachedWalls.has(t.id)) {
         const amt = Math.min(h.credits, mul(s.counter * (ev.counter || 1)));
         h.credits -= amt; t.credits += amt;
-        logs.push({ type: 'blocked', from: h.id, to: t.id, amount: amt });
+        logs.push({ type: 'blocked', action: betrayal ? 'betray' : 'hack', from: h.id, to: t.id, amount: amt });
       } else {
         let base = t.action === 'mine' ? s.steal : s.hackVsHack;
-        let betrayal = false;
         let trust = 0;
-        if (allied) {
+        if (betrayal) {
           trust = this.linkAges.get(linkKey(h.id, t.id)) || 0;
           const trustBonus = Math.min(trust * s.trustBetrayBonus, TRUST_BETRAY_CAP);
           base = (s.betraySteal + trustBonus) * (ev.betray || 1); // 오래된 동맹일수록 배신 수익↑
-          betrayal = true;
         }
         base *= (ev.hack || 1);
         if (t.traitorUntil >= this.round) base *= TRAITOR_MULT;
@@ -444,7 +463,7 @@ class Room {
           if (!ev.noMark) h.traitorUntil = this.round + 1;
           this.broadcast({ t: 'linkBroken', a: h.id, b: t.id, betrayal: true });
         }
-        logs.push({ type: 'hack', from: h.id, to: t.id, amount: amt, bounty, betrayal, trust });
+        logs.push({ type: betrayal ? 'betray' : 'hack', from: h.id, to: t.id, amount: amt, bounty, betrayal, trust });
       }
     }
 
@@ -463,14 +482,13 @@ class Room {
       logs.push({ type: 'mine', from: p.id, amount: amt, allies });
     }
 
-    // 3) 방화벽 기본 수익 (블랙아웃이면 0)
     for (const p of players.filter(x => x.action === 'wall')) {
-      const amt = ev.blackout ? 0 : mul(s.wallBase + (ev.wallBase || 0));
+      const breached = breachedWalls.has(p.id);
+      const amt = ev.blackout || breached ? 0 : mul(s.wallBase + (ev.wallBase || 0));
       p.credits += amt;
-      logs.push({ type: 'wall', from: p.id, amount: amt });
+      logs.push({ type: 'wall', from: p.id, amount: amt, breached });
     }
 
-    // 4) 동맹 배당 이벤트
     if (ev.dividend) {
       for (const p of players) {
         const n = this.linkedIds(p.id).length;
@@ -568,12 +586,13 @@ class Room {
         const ev = this.event;
         const myRank = ranked.findIndex(p => p.id === b.id);
         const lastRounds = this.round >= this.settings.rounds - 1;
-        let wMine = 0.55, wHack = 0.25, wWall = 0.20;
+        let wMine = 0.52, wHack = 0.23, wWall = 0.18, wBreach = 0.07;
         if (ev.mine) wMine += 0.25;
         if (ev.hack || ev.betray) wHack += 0.25;
-        if (ev.counter || ev.wallBase) wWall += 0.2;
-        if (ev.blackout) { wWall = Math.max(0.05, wWall - 0.15); wHack += 0.2; } // 방화벽 마비 → 공세
+        if (ev.counter || ev.wallBase) { wWall += 0.12; wBreach += 0.16; }
+        if (ev.blackout) { wWall = Math.max(0.05, wWall - 0.15); wBreach = Math.max(0.03, wBreach - 0.04); wHack += 0.2; } // 방화벽 마비 → 공세
         wHack += b.persona.greed * 0.2;
+        wBreach += b.persona.greed * 0.08;
         wWall += b.persona.caution * 0.15;
         wWall += (this.warns.get(b.id) || 0) * 0.25; // 경고를 받으면 움츠린다
         if (this.linkedIds(b.id).length > 0) wMine += 0.15;
@@ -583,9 +602,16 @@ class Room {
           wHack += 0.5;
           forcedTarget = ranked[cutoff - 1] && ranked[cutoff - 1].id !== b.id ? ranked[cutoff - 1] : null;
         }
-        const total = wMine + wHack + wWall;
+        const total = wMine + wHack + wWall + wBreach;
         const r = Math.random() * total;
-        if (r < wHack) {
+        if (r < wBreach) {
+          const targets = ranked.filter(p => p.id !== b.id);
+          const warned = targets.filter(p => (this.warns.get(p.id) || 0) > 0);
+          const pool = warned.length ? warned : targets.slice(0, Math.max(1, Math.ceil(targets.length / 2)));
+          const target = pool[Math.floor(Math.random() * pool.length)];
+          if (target) { b.action = 'breach'; b.target = target.id; return; }
+        }
+        if (r < wBreach + wHack) {
           let target = forcedTarget;
           if (!target) {
             const traitors = ranked.filter(p => p.id !== b.id && p.traitorUntil >= this.round);
@@ -606,9 +632,13 @@ class Room {
                             - (x.credits + (this.linkAges.get(linkKey(b.id, x.id)) || 0) * 30));
             if (allyTargets[0] && allyTargets[0].credits > b.credits * 0.6) target = allyTargets[0];
           }
-          if (target && target.id !== b.id) { b.action = 'hack'; b.target = target.id; return; }
+          if (target && target.id !== b.id) {
+            b.action = this.links.has(linkKey(b.id, target.id)) ? 'betray' : 'hack';
+            b.target = target.id;
+            return;
+          }
         }
-        if (r < wHack + wWall) { b.action = 'wall'; b.target = null; }
+        if (r < wBreach + wHack + wWall) { b.action = 'wall'; b.target = null; }
         else { b.action = 'mine'; b.target = null; }
       }, 800 + Math.random() * Math.max(2000, this.phaseMs('action') - 4000));
     }

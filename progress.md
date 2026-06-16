@@ -30,6 +30,7 @@ Done:
 - Extended `verify:room` to prove lobby and live-game economy settings broadcast to students while the host remains a non-playing monitor.
 - Captured browser QA evidence for desktop/mobile host settings, student dock copy, settings JSON, and no console errors under `.omo/evidence/`.
 - Passed final combined verification and independent ultrawork review for the economy-balance change.
+- Added the five-action counterplay update: explicit 우회/breach, explicit 배신/betray, the cycle 배신 > 채굴 > 우회 > 방화벽 > 해킹 > 배신, and exact personal attacker visibility during settlement.
 
 TODO:
 - None.
