@@ -152,7 +152,21 @@ function createDom() {
     return node;
   });
 
-  const ruleInputs = ['maxLinks', 'rounds', 'winnersPercent', 'signalSeconds', 'actionSeconds', 'resolveSeconds'].map((rule) => {
+  const ruleInputs = [
+    'maxLinks',
+    'rounds',
+    'winnersPercent',
+    'mineBase',
+    'allyMineBonus',
+    'trustMineBonus',
+    'steal',
+    'counter',
+    'betraySteal',
+    'trustBetrayBonus',
+    'signalSeconds',
+    'actionSeconds',
+    'resolveSeconds',
+  ].map((rule) => {
     const node = element(`rule-${rule}`);
     node.dataset.rule = rule;
     node.value = '1';
@@ -281,15 +295,15 @@ snap('r1-settle');
 next.onclick();
 next.onclick();
 next.onclick();
-action('hack').onclick();
+action('mine').onclick();
 next.onclick();
-snap('r2-settle-hack');
+snap('r2-settle-mine');
 prev.onclick();
 snap('r2-back-choice-preserved');
 prev.onclick();
 next.onclick();
 snap('r2-choice-cleared');
-action('hack').onclick();
+action('mine').onclick();
 next.onclick();
 next.onclick();
 next.onclick();
@@ -307,14 +321,29 @@ const checks = {
   r1ChoiceBlocksNext: snapshots.find((s) => s.label === 'r1-choice-before').nextDisabled === true,
   r1MineUnlocksNext: snapshots.find((s) => s.label === 'r1-choice-after-mine').nextDisabled === false,
   r2BackPreservesHack:
-    snapshots.find((s) => s.label === 'r2-back-choice-preserved').tutorial.selectedAction === 'hack' &&
+    snapshots.find((s) => s.label === 'r2-back-choice-preserved').tutorial.selectedAction === 'mine' &&
     snapshots.find((s) => s.label === 'r2-back-choice-preserved').nextDisabled === false,
   r2EarlierBackClearsChoice:
     snapshots.find((s) => s.label === 'r2-choice-cleared').tutorial.selectedAction === '' &&
     snapshots.find((s) => s.label === 'r2-choice-cleared').nextDisabled === true,
+  r1CooperationShowsNewBase:
+    snapshots.find((s) => s.label === 'r1-settle').tutorial.log.includes('+50C') &&
+    snapshots.find((s) => s.label === 'r1-settle').tutorial.scores.me === 150 &&
+    snapshots.find((s) => s.label === 'r1-settle').tutorial.scores.ally === 150,
+  r2CooperationGrowsWithTrust:
+    snapshots.find((s) => s.label === 'r2-settle-mine').tutorial.log.includes('+58C') &&
+    snapshots.find((s) => s.label === 'r2-settle-mine').tutorial.scores.me === 208 &&
+    snapshots.find((s) => s.label === 'r2-settle-mine').tutorial.trust === 2,
   finalIsBetrayMarked:
     snapshots.find((s) => s.label === 'final-betray').tutorial.phase === 'final' &&
     snapshots.find((s) => s.label === 'final-betray').tutorial.traitorMark === true,
+  finalBetrayShowsSpikeAndRisk:
+    snapshots.find((s) => s.label === 'final-betray').tutorial.scores.me === 313 &&
+    snapshots.find((s) => s.label === 'final-betray').tutorial.log.includes('TRAITOR MARK') &&
+    (
+      snapshots.find((s) => s.label === 'final-betray').tutorial.body.includes('다음 라운드') ||
+      snapshots.find((s) => s.label === 'final-betray').tutorial.note.includes('위험')
+    ),
   restartReturnsInitial:
     snapshots.find((s) => s.label === 'after-restart').tutorial.stepId === 'r1-event' &&
     snapshots.find((s) => s.label === 'after-restart').prevDisabled === true,
@@ -330,7 +359,11 @@ const result = {
     phase: snapshot.tutorial.phase,
     selectedAction: snapshot.tutorial.selectedAction,
     title: snapshot.tutorial.title,
+    body: snapshot.tutorial.body,
     log: snapshot.tutorial.log,
+    note: snapshot.tutorial.note,
+    scores: snapshot.tutorial.scores,
+    trust: snapshot.tutorial.trust,
     nextDisabled: snapshot.nextDisabled,
     traitorMark: snapshot.tutorial.traitorMark,
   })),

@@ -9,7 +9,8 @@
   "scripts": {
     "start": "node server.js",
     "verify:tutorial": "node scripts/verify-tutorial.mjs",
-    "verify:room": "node scripts/verify-room-smoke.mjs"
+    "verify:room": "node scripts/verify-room-smoke.mjs",
+    "verify:economy": "node scripts/verify-economy-balance.mjs"
   },
   "dependencies": {
     "ws": "^8.18.0"

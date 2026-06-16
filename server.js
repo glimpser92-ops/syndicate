@@ -15,14 +15,18 @@ const MAX_LINKS = 3;
 const START_CREDITS = 100;
 
 const MINE_BASE = 30;
-const ALLY_MINE_BONUS = 15;   // 동맹이 함께 채굴할 때, 동맹 1명당
+const ALLY_MINE_BONUS = 20;   // 동맹이 함께 채굴할 때, 동맹 1명당
+const TRUST_MINE_BONUS = 8;
+const TRUST_MINE_CAP = 32;
 const WALL_BASE = 10;
-const COUNTER = 30;           // 방화벽이 해커에게서 뺏는 양
+const COUNTER = 45;           // 방화벽이 해커에게서 뺏는 양
 const STEAL = 40;             // 채굴자 해킹 탈취량
-const BETRAY_STEAL = 60;      // 동맹 배신 탈취량
+const BETRAY_STEAL = 75;      // 동맹 배신 탈취량
+const TRUST_BETRAY_BONUS = 15;
+const TRUST_BETRAY_CAP = 60;
 const HACK_VS_HACK = 20;      // 해킹 중인 대상 해킹 탈취량
 const BOUNTY_BASE = 20;       // 선두 해킹 현상금
-const TRAITOR_MULT = 1.5;     // 배신자 낙인 대상 해킹 배율
+const TRAITOR_MULT = 1.8;     // 배신자 낙인 대상 해킹 배율
 
 const PHASE_MS = { event: 6000, signal: 22000, action: 18000, resolve: 12000 };
 const DEFAULT_SETTINGS = {
@@ -31,10 +35,12 @@ const DEFAULT_SETTINGS = {
   winnersPercent: 20,
   mineBase: MINE_BASE,
   allyMineBonus: ALLY_MINE_BONUS,
+  trustMineBonus: TRUST_MINE_BONUS,
   wallBase: WALL_BASE,
   counter: COUNTER,
   steal: STEAL,
   betraySteal: BETRAY_STEAL,
+  trustBetrayBonus: TRUST_BETRAY_BONUS,
   hackVsHack: HACK_VS_HACK,
   bountyBase: BOUNTY_BASE,
   signalSeconds: PHASE_MS.signal / 1000,
@@ -47,10 +53,12 @@ const SETTING_LIMITS = {
   winnersPercent: [10, 50],
   mineBase: [10, 80],
   allyMineBonus: [0, 50],
+  trustMineBonus: [0, 30],
   wallBase: [0, 60],
   counter: [0, 80],
   steal: [10, 100],
   betraySteal: [20, 140],
+  trustBetrayBonus: [0, 40],
   hackVsHack: [0, 80],
   bountyBase: [0, 80],
   signalSeconds: [8, 60],
@@ -81,6 +89,11 @@ const server = http.createServer((req, res) => {
   if (url.pathname === '/healthz') {
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
     res.end(JSON.stringify({ ok: true, rooms: rooms.size }));
+    return;
+  }
+  if (url.pathname === '/favicon.ico') {
+    res.writeHead(204);
+    res.end();
     return;
   }
   const file = url.pathname === '/' ? '/index.html' : url.pathname;
@@ -408,8 +421,9 @@ class Room {
         let betrayal = false;
         let trust = 0;
         if (allied) {
-          trust = Math.min(this.linkAges.get(linkKey(h.id, t.id)) || 0, 4);
-          base = (s.betraySteal + trust * 10) * (ev.betray || 1); // 오래된 동맹일수록 배신 수익↑
+          trust = this.linkAges.get(linkKey(h.id, t.id)) || 0;
+          const trustBonus = Math.min(trust * s.trustBetrayBonus, TRUST_BETRAY_CAP);
+          base = (s.betraySteal + trustBonus) * (ev.betray || 1); // 오래된 동맹일수록 배신 수익↑
           betrayal = true;
         }
         base *= (ev.hack || 1);
@@ -434,14 +448,14 @@ class Room {
       }
     }
 
-    // 2) 채굴 정산 (동맹 합동 보너스 — 오래 유지한 동맹일수록 +5/라운드, 최대 +20)
     for (const p of players.filter(x => x.action === 'mine')) {
       let bonus = 0, allies = 0;
       for (const id of this.linkedIds(p.id)) {
         const a = this.players.get(id);
         if (a && a.action === 'mine') {
           allies++;
-          bonus += s.allyMineBonus + Math.min((this.linkAges.get(linkKey(p.id, id)) || 0) * 5, 20);
+          const trust = this.linkAges.get(linkKey(p.id, id)) || 0;
+          bonus += s.allyMineBonus + Math.min(trust * s.trustMineBonus, TRUST_MINE_CAP);
         }
       }
       const amt = mul(Math.round((s.mineBase + bonus) * (ev.mine || 1)));

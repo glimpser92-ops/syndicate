@@ -22,6 +22,14 @@ Done:
 - Adjusted the first-screen layout after independent designer review: the home screen now starts from the top instead of vertical centering, mobile shows the tutorial before the join/create card, and mobile tutorial actions appear before the longer explanation block.
 - Added `scripts/verify-room-smoke.mjs` and `npm run verify:room` to durably regression-check host room creation, student join, max 20 participants, and host exclusion from the player list.
 - Received independent code-reviewer approval for the final tutorial/room behavior; an architect gate still needs to be rerun after the new room-smoke script.
+- Tuned the classroom economy so repeated alliance mining grows from 50C to 58C+, trusted betrayal spikes to 105C before event modifiers, wrong firewall attacks cost 45C, and marked traitors are hit at 1.8x for the next round.
+- Added `scripts/verify-economy-balance.mjs` and `npm run verify:economy` to prove the balance through public WebSocket play with four human students.
+- Captured failing-first economy evidence in `.omo/evidence/task-1-economy-failing-first.txt`, then passing evidence in `.omo/evidence/task-2-economy-passing.txt`.
+- Added compact host controls for alliance bonus, trust mining bonus, firewall counter, and betrayal trust bonus in both lobby and live host settings.
+- Updated student dock copy and the first-screen 3-round tutorial so cooperation growth, the late betrayal temptation, and punishment risk are visible with the current numbers.
+- Extended `verify:room` to prove lobby and live-game economy settings broadcast to students while the host remains a non-playing monitor.
+- Captured browser QA evidence for desktop/mobile host settings, student dock copy, settings JSON, and no console errors under `.omo/evidence/`.
+- Passed final combined verification and independent ultrawork review for the economy-balance change.
 
 TODO:
-- Rerun the independent architect final gate and update `.omx/ultragoal/quality-gate.json` from `review_blocked` only if it returns CLEAR.
+- None.
